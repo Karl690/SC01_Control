@@ -165,7 +165,7 @@ void ui_settings_serial_load_event_cb(lv_event_t* e)
 		}
 		else
 		{
-			lv_dropdown_set_selected(ui_serial->ui_tx_pin, get_index_from_value(GPIO_NUM_11));
+			lv_dropdown_set_selected(ui_serial->ui_tx_pin, get_index_from_value(GPIO_NUM_1));
 			lv_dropdown_set_selected(ui_serial->ui_rx_pin, get_index_from_value(GPIO_NUM_13));
 			lv_dropdown_set_selected(ui_serial->ui_baud, get_index_from_baud(115200));
 		}

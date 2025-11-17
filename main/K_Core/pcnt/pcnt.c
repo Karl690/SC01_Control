@@ -134,9 +134,8 @@ void SetPwmOutput()
 	systemconfig.pcnt.duty_test++; //count up
 	PwmTimerReloadRegister++;
 	if (PwmTimerReloadRegister > 32)PwmTimerReloadRegister = 0;
-	if (pcnt_info.duty > PwmTimerReloadRegister)
-//	pcnt_info.duty
-//	if (systemconfig.pcnt.duty_test & 0x0001)
+	//if (pcnt_info.duty > PwmTimerReloadRegister)
+	if (systemconfig.pcnt.duty_test & 0x0001)
 	{
 		gpio_set_level(ControlOutput_PIN, 1); //disable the heater until code is stable
 	}

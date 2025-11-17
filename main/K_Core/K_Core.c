@@ -18,7 +18,7 @@ void K_Core_Main()
 {
 	// Init_RCC();
 
-	adc_init();
+	//adc_init();
 	serial_init();
 	secs_init();
 	simple_init();
@@ -35,7 +35,7 @@ void K_Core_Main()
 	// Init_USB_DEVICE(); //DO NOT call this BEFORE SYSTICK_Config, it will freeze in a loop because of hal_Delay()
 	
 	taskmanager_init();
-	SendPing();
+	//SendPing();
 	requestBleNameTo407();
 	//communication_add_string_to_serial_buffer(&MasterCommPort->TxBuffer, "G6 S99\n");
 	//xTaskCreatePinnedToCore(forground_task, "forground_task", 1024 * 2, NULL, 10, NULL, 1);
