@@ -28,13 +28,11 @@ idf_component_register(
                     L_Core/ui/ui-plot.c
                 	L_Core/ui/images/btn_about.c
                 	L_Core/ui/images/copyright.c
-                	L_Core/ui/images/pct_ge.c
-                    L_Core/ui/images/pctge_mark.c
-                	L_Core/ui/images/btnhome-01.c
-                	L_Core/ui/images/btnhome-02.c
-                	L_Core/ui/images/btnhome-03.c
-                	L_Core/ui/images/btnhome-04.c
-                	L_Core/ui/images/btnhome-06.c
+                	L_Core/ui/images/btnhome_01.c
+                	L_Core/ui/images/btnhome_02.c
+                	L_Core/ui/images/btnhome_03.c
+                	L_Core/ui/images/btnhome_04.c
+                	L_Core/ui/images/btnhome_06.c
                 	L_Core/ui/images/folder.c
                 	L_Core/ui/images/pct.c
                     L_Core/ui/images/wifi.c
@@ -44,15 +42,19 @@ idf_component_register(
                 	L_Core/ui/images/bluetooth.c
                 	L_Core/ui/images/settings.c
                 	L_Core/ui/images/variables.c
-                	L_Core/ui/images/btnhome-05.c
-                	L_Core/ui/images/btnhome-07.c
-                	L_Core/ui/images/btnhome-08.c
+                	L_Core/ui/images/btnhome_05.c
+					L_Core/ui/images/btnhome_06.c
+                	L_Core/ui/images/btnhome_07.c
+                	L_Core/ui/images/btnhome_08.c
                 	L_Core/ui/images/controllers.c
                 	L_Core/ui/images/fan.c
                 	L_Core/ui/images/heater.c
                 	L_Core/ui/images/mtr.c
                     L_Core/ui/images/plot.c
                     L_Core/ui/images/secs.c
+					L_Core/ui/images/logo.c
+					L_Core/ui/images/hyrel_logo.c
+					L_Core/ui/images/hyrel3d_logo.c
                 	L_Core/ui/font/en_12.c
                 	L_Core/ui/font/en_16.c
                 	L_Core/ui/font/en_bold_16.c
