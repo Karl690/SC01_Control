@@ -76,6 +76,7 @@ void serial_uart_update_config(uart_port_t port, int tx_pin, int rx_pin, int bau
 }
 bool serial_uart_write_byte(COMPORT* comport, char byte)
 {
+	return true;
 	if (uart_write_bytes((uart_port_t)comport->uart_id, &byte, 1) != 1) {
 		ESP_LOGE(TAG, "Send data critical failure.");
 		// add your code to handle sending failure here
@@ -155,7 +156,7 @@ void serial_init()
 	RawRxUrgentComBuffer.commandPtr =			RawRxUrgentComBuffer.command;
 	memset(RawRxUrgentComBuffer.buffer, 0, RawRxUrgentComBuffer.Buffer_Size);
 	
-	xTaskCreatePinnedToCore(serial_uart1_read_task, "uart_thread1", RX_BUF_SIZE * 4, NULL, 10, NULL, 1);
+	// xTaskCreatePinnedToCore(serial_uart1_read_task, "uart_thread1", RX_BUF_SIZE * 4, NULL, 10, NULL, 1);
 	// xTaskCreate(serial_uart2_read_task, "uart_thread2", RX_BUF_SIZE * 4, NULL, configMAX_PRIORITIES - 2, NULL); //configMAX_PRIORITIES - 1,
-	xTaskCreatePinnedToCore(serial_uart2_read_task, "uart_thread2", RX_BUF_SIZE * 4, NULL, 10, NULL, 1);
+	// xTaskCreatePinnedToCore(serial_uart2_read_task, "uart_thread2", RX_BUF_SIZE * 4, NULL, 10, NULL, 1);
 }
