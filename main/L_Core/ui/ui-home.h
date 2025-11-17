@@ -10,6 +10,7 @@ enum
 	UI_HOME_BTN_WIFI,
 	UI_HOME_BTN_SECS,
 	UI_HOME_BTN_SIMPLE,
+	UI_HOME_BTN_CONTROL,
 };
 extern lv_obj_t* ui_home_screen;
 void ui_home_screen_init(void);

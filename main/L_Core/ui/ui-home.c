@@ -13,20 +13,8 @@ lv_obj_t* ui_home_screen;
 void ui_home_call_event_button(uint8_t code, bool direct)
 {
 	ui_send_button_event(SCREEN_HOME, code, direct);
-	int screen_id = SCREEN_HOME;
-	switch (code)
-	{
-	case UI_HOME_BTN_SETTINGS: screen_id = SCREEN_SETTINGS; break;
-	case UI_HOME_BTN_SDCARD: screen_id = SCREEN_SDCARD; break;
-	case UI_HOME_BTN_TUNE: screen_id = SCREEN_TUNE; break;
-	case UI_HOME_BTN_MEG: screen_id = SCREEN_MEG; break;
-	case UI_HOME_BTN_BLE: screen_id = SCREEN_BLUETOOTH; break;
-	case UI_HOME_BTN_WIFI: screen_id = SCREEN_WIFI; break;
-	case UI_HOME_BTN_SECS: screen_id = SCREEN_SECS; break;
-	case UI_HOME_BTN_SIMPLE: screen_id = SCREEN_SIMPLE; break;
-	}	
-	ui_transform_screen(screen_id);
-	if (screen_id == SCREEN_SDCARD) ui_sdcard_load_directory(current_sdcard_path);
+	ui_transform_screen(code);
+	if (code == SCREEN_SDCARD) ui_sdcard_load_directory(current_sdcard_path);
 }
 
 static void ui_home_event_tranform_screen_cb(lv_event_t* e)
@@ -60,20 +48,20 @@ lv_obj_t* ui_home_create_button(lv_obj_t* parent, const lv_img_dsc_t* img, const
 
 void ui_home_screen_init(void)
 {	
-	LV_IMG_DECLARE(btnhome_01);
-	LV_IMG_DECLARE(btnhome_02);
-	LV_IMG_DECLARE(btnhome_03);
-	LV_IMG_DECLARE(btnhome_04);
-	LV_IMG_DECLARE(btnhome_05);
-	LV_IMG_DECLARE(btnhome_06);
-	LV_IMG_DECLARE(btnhome_07);
-	LV_IMG_DECLARE(btnhome_08);
-	LV_IMG_DECLARE(settings);
+	LV_IMG_DECLARE(img_btnhome_01);
+	LV_IMG_DECLARE(img_btnhome_02);
+	LV_IMG_DECLARE(img_btnhome_03);
+	LV_IMG_DECLARE(img_btnhome_04);
+	LV_IMG_DECLARE(img_btnhome_05);
+	LV_IMG_DECLARE(img_btnhome_06);
+	LV_IMG_DECLARE(img_btnhome_07);
+	LV_IMG_DECLARE(img_btnhome_08);
+	LV_IMG_DECLARE(img_settings);
 	//LV_IMG_DECLARE(variables);
-	LV_IMG_DECLARE(folder);
-	LV_IMG_DECLARE(bluetooth);
+	LV_IMG_DECLARE(img_folder);
+	LV_IMG_DECLARE(img_bluetooth);
 	LV_IMG_DECLARE(img_meg);
-	LV_IMG_DECLARE(plot);
+	LV_IMG_DECLARE(img_plot);
 	LV_IMG_DECLARE(img_secs);
 	LV_IMG_DECLARE(img_wifi);
 	LV_IMG_DECLARE(img_simple);
@@ -84,47 +72,47 @@ void ui_home_screen_init(void)
 	lv_obj_set_style_bg_opa(ui_home_screen, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	uint16_t x = 20, y = 60, gap_x = 10, gap_y = 30;
 	lv_obj_t* obj;
-	obj = ui_home_create_button(ui_home_screen, &btnhome_01, &settings, "SETTINGS");
-	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)UI_HOME_BTN_SETTINGS);
+	obj = ui_home_create_button(ui_home_screen, &img_btnhome_01, &img_settings, "SETTINGS");
+	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)SCREEN_SETTINGS);
 	lv_obj_set_pos(obj, x, y);
 	
 	x += BUTTON_WIDTH + gap_x;
-	obj = ui_home_create_button(ui_home_screen, &btnhome_02, &folder, "SD Card");
-	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)UI_HOME_BTN_SDCARD);
+	obj = ui_home_create_button(ui_home_screen, &img_btnhome_02, &img_folder, "SD Card");
+	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)SCREEN_SDCARD);
 	lv_obj_set_pos(obj, x, y);
 
 	x += BUTTON_WIDTH + gap_x;
-	obj = ui_home_create_button(ui_home_screen, &btnhome_03, &plot, "TUNE");
-	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)UI_HOME_BTN_TUNE);
+	obj = ui_home_create_button(ui_home_screen, &img_btnhome_03, &img_plot, "TUNE");
+	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)SCREEN_TUNE);
 	lv_obj_set_pos(obj, x, y);
 	
 	x += BUTTON_WIDTH + gap_x;
-	obj = ui_home_create_button(ui_home_screen, &btnhome_04, &img_meg, "MEG");
-	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)UI_HOME_BTN_MEG);
+	obj = ui_home_create_button(ui_home_screen, &img_btnhome_04, &img_meg, "CONTROL");
+	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)SCREEN_CONTROLS);
 	lv_obj_set_pos(obj, x, y);
 	
 	x = 20;
 	y += BUTTON_HEIGHT + gap_y;
-	obj = ui_home_create_button(ui_home_screen, &btnhome_05, &bluetooth, "BLE");
-	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)UI_HOME_BTN_BLE);
+	obj = ui_home_create_button(ui_home_screen, &img_btnhome_05, &img_bluetooth, "BLE");
+	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)SCREEN_BLUETOOTH);
 	lv_obj_set_pos(obj, x, y);
 	
 	x += BUTTON_WIDTH + gap_x;
-	obj = ui_home_create_button(ui_home_screen, &btnhome_06, &img_wifi, "WIFI");
-	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)UI_HOME_BTN_WIFI);
+	obj = ui_home_create_button(ui_home_screen, &img_btnhome_06, &img_wifi, "WIFI");
+	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)SCREEN_WIFI);
 	lv_obj_set_pos(obj, x, y);
 	
 	x += BUTTON_WIDTH + gap_x;
-	obj = ui_home_create_button(ui_home_screen, &btnhome_07, &img_secs, "SECS");
-	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)UI_HOME_BTN_SECS);
+	obj = ui_home_create_button(ui_home_screen, &img_btnhome_07, &img_secs, "SECS");
+	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)SCREEN_SECS);
 	lv_obj_set_pos(obj, x, y);
 	
 	x += BUTTON_WIDTH + gap_x;
-	obj = ui_home_create_button(ui_home_screen, &btnhome_08, &img_simple, "SIMPLE");
-	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)UI_HOME_BTN_SIMPLE);
+	obj = ui_home_create_button(ui_home_screen, &img_btnhome_08, &img_simple, "SIMPLE");
+	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)SCREEN_SIMPLE);
 	lv_obj_set_pos(obj, x, y);
 	
 	
-	lv_obj_t* banner = ui_create_label(ui_home_screen, "#ffffff ©2023, PCT Systems. All rights reserved. #", &font_en_16);
+	lv_obj_t* banner = ui_create_label(ui_home_screen, "#ffffff ©2025, HYREL3D Systems. All rights reserved. #", &mono_regualr_16);
 	lv_obj_align(banner, LV_ALIGN_BOTTOM_MID, 0, -10);
 }

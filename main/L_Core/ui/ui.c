@@ -23,7 +23,8 @@
 #include "ui-simple.h"
 #include "ui-plot.h"
 #include "ui-wifi.h"
-LV_IMG_DECLARE(img_pctge_mark);
+
+LV_IMG_DECLARE(img_hyrel3d_logo);
 
 lv_obj_t * keyboard;
 lv_obj_t* msgbox;
@@ -216,19 +217,15 @@ void ui_create_pct_title(lv_obj_t* parent, uint8_t screen)
 	lv_obj_set_style_bg_color(logbutton, lv_color_hex(0x0), LV_PART_MAIN | LV_STATE_DEFAULT);
 	
 	lv_obj_t * obj = lv_img_create(logbutton);
-	lv_img_set_src(obj, &img_pctge_mark);
-	lv_img_set_zoom(obj, 108);
-	lv_img_set_pivot(obj, 0, 0);
-	lv_obj_set_pos(obj, -10, -10);
+	lv_img_set_src(obj, &img_hyrel3d_logo);
+	lv_obj_align(obj, LV_ALIGN_CENTER, 0, -10);
 	lv_obj_add_event_cb(logbutton, ui_event_title_button_cb, LV_EVENT_CLICKED, (void*)UI_BTN_HOME);		
-	
 	
 	int x = 5;
 	int button_w = 60;
 	int button_large_width = 90;
 	int button_h = 50;
 	int gap = 5;
-	
 	
 	switch (screen)
 	{
@@ -527,10 +524,10 @@ void InitUI( void )
     //lv_disp_load_scr(ui_main_screen);
 	
 	// Switch to the main application if OTA has not been started
-	vTaskDelay(pdMS_TO_TICKS(2000));
+	vTaskDelay(pdMS_TO_TICKS(4000));
 	//lv_scr_load(ui_variables_screen);
 	//lv_scr_load_anim(ui_home_screen, LV_SCR_LOAD_ANIM_FADE_ON, 300, 0, false);
-	ui_transform_screen(SCREEN_MEG);
+	ui_transform_screen(SCREEN_CONTROLS);
 
 	lv_timer_create(ui_update_timer, 200, NULL);
 }
