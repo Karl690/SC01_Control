@@ -12,6 +12,8 @@
 #include "L_Core/ui/ui.h"
 #include "K_Core/display/DisplayList.h"
 #include "K_Core/execution/cmdprocessor.h"
+#include "K_Core/pcnt/pcnt.h"
+
 const char *TAG = "L_Core";
 bool IsInitialized = false;
 SYSTEMCONFIG systemconfig;
@@ -77,6 +79,12 @@ bool load_configuration()
 	if (!systemconfig.secs.timerRetry) systemconfig.secs.timerRetry = 3;
 	if (systemconfig.server_base_address == 0xff) systemconfig.server_base_address = 0;
 	if (systemconfig.can_address == 0xff) systemconfig.can_address = 0;
+
+	if (systemconfig.pcnt.temp_scale == 0.0f) systemconfig.pcnt.temp_scale = PCNT_TEMP_SCAL_VALUE;
+	if (systemconfig.pcnt.battery_scale == 0.0f) systemconfig.pcnt.battery_scale = PCNT_BATTERY_SCAL_VALUE;
+	if (systemconfig.pcnt.rtd_scale == 0.0f) systemconfig.pcnt.rtd_scale = PCNT_RTD_SCAL_VALUE;
+	if (systemconfig.pcnt.duty_scale == 0.0f) systemconfig.pcnt.duty_scale = PCNT_DUTY_SCAL_VALUE;
+	if (systemconfig.pcnt.duty_test != 0.0f) systemconfig.pcnt.duty_test = 0;
 	return true;
 }
 bool load_configu_from_ssd() {

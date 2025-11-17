@@ -1,0 +1,29 @@
+{
+    "idf.portWin": "COM4",
+    "idf.flashType": "UART",
+    "files.associations": {
+        "ui.h": "c",
+        "font.h": "c",
+        "lvgl.h": "c",
+        "inttypes.h": "c",
+        "taskmanager.h": "c",
+        "future": "cpp",
+        "system_error": "cpp",
+        "regex": "cpp",
+        "bitset": "c",
+        "chrono": "c",
+        "ratio": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "ui-control.h": "c",
+        "numbers": "cpp",
+        "pcnt.h": "c",
+        "iterator": "cpp"
+    },
+    "idf.espIdfPathWin": "C:\\Users\\falcon\\esp\\v5.4.3\\esp-idf",
+    "idf.toolsPathWin": "C:\\Users\\falcon\\.espressif",
+    "idf.pythonInstallPath": "C:\\Users\\falcon\\.espressif\\tools\\idf-python\\3.11.2\\python.exe"
+}

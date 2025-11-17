@@ -61,6 +61,21 @@ typedef struct
 	uint8_t timerReload2;
 	uint8_t timerRetry;
 } SECS_CONFIG;
+
+typedef struct 
+{
+	uint8_t pcnt_pin_01;
+	uint8_t pcnt_pin_02;
+	uint8_t enabled;
+	uint8_t ctrl_pin;
+	uint16_t programmed_temperature;
+	float temp_scale;
+	float battery_scale;
+	float rtd_scale;
+	float duty_scale;
+	int duty_test;
+} PCNT_CONFIG;
+
 typedef struct 
 {
 	uint8_t initialized;
@@ -70,8 +85,10 @@ typedef struct
 	SDCARD_CONFIG sdcard;
 	SERIAL_CONFIG serial1;
 	SERIAL_CONFIG serial2;
+	PCNT_CONFIG pcnt;
 	SECS_CONFIG secs;
 	uint8_t ScreenControlEnabled;
 	uint8_t server_base_address;
 	uint8_t can_address;
+	
 }SYSTEMCONFIG;

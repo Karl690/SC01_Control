@@ -16,3 +16,7 @@
 #define EXT_IO4		GPIO_NUM_13
 #define EXT_IO5		GPIO_NUM_14
 #define EXT_IO6		GPIO_NUM_21
+
+#define Counter1_INPUT_PIN GPIO_NUM_2
+#define Counter2_INPUT_PIN GPIO_NUM_13
+#define ControlOutput_PIN GPIO_NUM_1

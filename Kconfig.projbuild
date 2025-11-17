@@ -1,0 +1,27 @@
+menu "DISAL Config"
+
+    config APP_CMD_MAX_SIZE
+        int "Command's Queue maximum size"
+        range 20 100
+        default 50
+        help
+            Command's Queue maximum size.
+
+    config APP_USE_SERIAL
+        bool "Enable Serial usage"
+        default n
+        help
+            Enable Serial usage.
+
+    config APP_USE_AMPLIFIER
+        bool "Enable Ampifier usage"
+        default n
+        help
+            Enable Ampifier usage.
+
+    config APP_USE_ADC
+        bool "Enable ADC usage"
+        default n
+        help
+            Enable ADC usage.
+endmenu            

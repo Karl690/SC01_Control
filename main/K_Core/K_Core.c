@@ -10,6 +10,8 @@
 #include "secs/secs.h"
 #include "simple/simple.h"
 #include "K_Core/amplifier/amplifier.h"
+#include "pcnt/pcnt.h"
+
 DisplayVariableInfo *ActiveVariableInfo = NULL;
 void forground_task(void* arg);
 void K_Core_Main()
@@ -21,6 +23,7 @@ void K_Core_Main()
 	secs_init();
 	simple_init();
 	amplifier_init();
+	pcnt_init();//set up the frequency counters for temperature and battery voltage
 	// sps30_init();
 	// InitSerialBuffers();
 	// Init_Uart();

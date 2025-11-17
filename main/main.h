@@ -18,7 +18,8 @@
 #include "freertos/event_groups.h"
 #include "esp_system.h"
 #include "esp_event.h"
-
+#include <driver/gpio.h>
+#include "K_Core/gpio/pinout.h"
 
 #include "L_Core/devices/conf_WT32SCO1-Plus.h"
 

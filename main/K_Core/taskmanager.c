@@ -10,6 +10,7 @@
 #include "K_Core/execution/cmdprocessor.h"
 #include "K_Core/simple/simple.h"
 #include "K_Core/amplifier/amplifier.h"
+#include "K_Core/pcnt/pcnt.h"
 esp_timer_handle_t systickTimer;
 
 
