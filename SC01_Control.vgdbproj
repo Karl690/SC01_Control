@@ -226,7 +226,7 @@
     <DebugMethod>
       <ID>openocd</ID>
       <InterfaceID>esp_usb_jtag</InterfaceID>
-      <InterfaceSerialNumber>34:85:18:B6:41:30</InterfaceSerialNumber>
+      <InterfaceSerialNumber>34:85:18:B6:39:28</InterfaceSerialNumber>
       <Configuration xsi:type="com.visualgdb.edp.openocd.settings.esp32">
         <CommandLine>-f interface/esp_usb_jtag.cfg -c "adapter_khz 3000" -f target/esp32s3.cfg</CommandLine>
         <ExtraParameters>

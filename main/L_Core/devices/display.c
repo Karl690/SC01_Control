@@ -37,7 +37,7 @@ esp_err_t InitLCDAndLVGL()
 	
 #else
 	//if (lcd.width() < lcd.height()) lcd.setRotation(lcd.getRotation() ^ 2);
-	lcd.setRotation(3);
+	lcd.setRotation(1);
 #endif
 	lcd.setColorDepth(16);	
 	lcd.setBrightness(128);

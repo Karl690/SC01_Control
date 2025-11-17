@@ -17,12 +17,13 @@ void forground_task(void* arg);
 void K_Core_Main()
 {
 	// Init_RCC();
-	gpio_init();
+
 	adc_init();
 	serial_init();
 	secs_init();
 	simple_init();
 	amplifier_init();
+	gpio_init();
 	pcnt_init();//set up the frequency counters for temperature and battery voltage
 	// sps30_init();
 	// InitSerialBuffers();

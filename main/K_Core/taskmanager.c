@@ -22,10 +22,10 @@ const PFUNC F1000HZ[NUM_1000HZ] =
 	Spare,
 	// keep as last call in this array
 	communication_check_rx_uart1,
-	communication_check_rx_uart2,
+	SetPwmOutput, //Spare, //communication_check_rx_uart2,
 	communication_check_rx_ble,
 	communication_check_tx_uart1,
-	communication_check_tx_uart2,
+	Spare, //communication_check_tx_uart2,
 	communication_check_tx_ble,
 	cmd_sequener,
 };
@@ -37,7 +37,7 @@ const PFUNC F100HZ[NUM_100HZ] =
 	simple_parse_command, //serial_uart_check_rxtx, //Spare,
 	simple_send_dump_screen, //serial_rs485_check_rxtx, //Spare,
 	Spare,
-	Spare,
+	Read_Counters,
 	Spare,
 	Spare,
 };
@@ -48,7 +48,7 @@ const PFUNC F10HZ[NUM_10HZ] =
 	cmd_transfer_log_file_task,
 	Spare,
 	Spare,
-	Spare,
+	Calculate_Heater_DutyCycle, //Spare,
 	Spare,
 	Spare,
 	Spare,
@@ -62,7 +62,7 @@ const PFUNC F1HZ[NUM_1HZ] =
 	Spare,
 	Spare, //sps30_request_read,
 	CheckBluetoothConnection,
-	amplifier_build_status_string,
+	Spare, //amplifier_build_status_string,
 	BlinkHeartBeat,
 };
 /*
