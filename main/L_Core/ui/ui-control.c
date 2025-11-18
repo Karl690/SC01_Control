@@ -45,7 +45,7 @@ void ui_control_refresh() {
 	sprintf(ui_temp_string, "%.1f%c", pcnt_info.bat_volt, '%');
 	lv_label_set_text(ui_control.battery, ui_temp_string);
 	
-	sprintf(ui_temp_string, "%.2f'C", pcnt_info.temperature);
+	sprintf(ui_temp_string, "%.1f'C", pcnt_info.temperature);
 	lv_label_set_text(ui_control.temp, ui_temp_string);//pcnt_info.temperature
 
 	int CalcDuty = pcnt_info.duty * 6;

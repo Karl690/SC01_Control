@@ -9,6 +9,10 @@ PCNT_INFO pcnt_info = { 0, 0, 0, 0, 0, 0 };
 #define TEMP_SCALE                      32
 #define TEMP_SCALEF                     32.0f
 #define MAX_TEMP                        0x7fff  // max positive
+#define ADC_NUM_SAMPLES                 10  // 10 values saved; toss high and low to get average
+#define ADC_SHIFT_FOR_AVG               3
+int16_t     sampleHistory[ADC_NUM_SAMPLES]; // last N reads from ADC
+int16_t TemperatureSampleIndex = 0;
 
 pcnt_unit_handle_t PulseCounter_1 = NULL;
 pcnt_unit_handle_t PulseCounter_2 = NULL;
@@ -202,6 +206,41 @@ float convertRtdDataFromRawADCValue(const PcntTableStruct* adcTable, float RTD_V
 	return conversionValue;
 }
 
+void SmoothDataUsingOlympicVotingAverage(int RawValue)
+{
+	sampleHistory[TemperatureSampleIndex] = (RawValue + sampleHistory[TemperatureSampleIndex])/2;
+	TemperatureSampleIndex++;
+	if (TemperatureSampleIndex > ADC_NUM_SAMPLES)
+	{
+		TemperatureSampleIndex = 0; 
+
+		// history buffer is full, so enough good adc values to proceed
+
+		// this code does olympic voting (toss high and low and then average the rest)
+		// the ADC_NUM_SAMPLES must be equal to (2^n) + 2 and ADC_SHIFT_FOR_AVG
+		// must equal "n", as the code will shift to get the average instead of divide. set temporary
+		// variables to record highest and lowest values as each of the ADC_NUM_SAMPLES is inspected
+		// at the same time, record the sum of all ADC_NUM_SAMPLES samples.  when done looking at all values,
+		// subtract the high and low from the sum and then calculate the average of the remaining sum.
+		int32_t sum, raw, low, high, i;
+		low = 0x7fffffff; // MAXINT
+		high = 0x80000000; // MININT
+		sum = 0;
+		for (i = 0; i < ADC_NUM_SAMPLES; i++)
+		{
+			raw = sampleHistory[i];
+			sum += raw; // keep running total
+			if (raw < low) low = raw; // update the lowest reading
+			if (raw > high)high = raw; // update the highest reading
+		}
+		sum -= (low + high); // sum is now the total of the middle N values
+
+		//next we will shift by n to effect a divide by 2^n to get the average of the 2^n remaining samples
+		RtdVoltage = (float)((float)(sum >> ADC_SHIFT_FOR_AVG) / 3200); //systemconfig.pcnt.rtd_scale;
+		pcnt_info.rtd_volt = RtdVoltage; //update global
+	}
+}
+
 void Read_Counters() {
 	//reads both counter1 and 2, then resets counters to 0, used in 100hz loop
 	//so we are actually getting frequency in 100 hz resolution
@@ -219,21 +258,25 @@ void Read_Counters() {
 	{Battery_V_Freq = 0; }
 	else
 	{Battery_V_Freq = pcnt_info.count02 - 1000; }
+	
+	//battery voltage next
+	BatteryVoltage = (float)((float)Battery_V_Freq / 337); //systemconfig.pcnt.battery_scale;
+	pcnt_info.bat_volt = BatteryVoltage; //update global variable
+	
 	//adjust the temperature next
 	if (pcnt_info.count01 < 1000)//adjust for 0 volt freq offset of 1000
 	{TemperatureFreq = 0; }
 	else
 	{TemperatureFreq = pcnt_info.count01 - 1000; }
+	SmoothDataUsingOlympicVotingAverage(TemperatureFreq);
 	// next we can apply the scaling logic to the net count
 	//the V/F internal reference is 2.5V so 2.5V should have 90% 
 	//or 900khz for the full scale frequency, that would correspond to a
 	//2.5*900000/100   or   2.5v=8000  >>  or   voltage=NetCount/3200 
-	
-	RtdVoltage = (float)((float)TemperatureFreq / 3200); //systemconfig.pcnt.rtd_scale;
-	pcnt_info.rtd_volt = RtdVoltage; //update global
-	//battery voltage next
-	BatteryVoltage = (float)((float)Battery_V_Freq / 337); //systemconfig.pcnt.battery_scale;
-	pcnt_info.bat_volt = BatteryVoltage; //update global variable
+//	
+//	RtdVoltage = (float)((float)TemperatureFreq / 3200); //systemconfig.pcnt.rtd_scale;
+//	pcnt_info.rtd_volt = RtdVoltage; //update global
+
 	//convert to temperature
 	Temperature = convertRtdDataFromRawADCValue(RtdTable_1K, (RtdVoltage*systemconfig.pcnt.rtd_scale)); //use lookup table to convert voltage to temperature
 	pcnt_info.temperature = Temperature;
