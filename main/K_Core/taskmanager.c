@@ -19,14 +19,14 @@ uint16_t SliceOffset = 0;
 uint32_t HeartBeat = 0;
 const PFUNC F1000HZ[NUM_1000HZ] =
 {
-	Spare,
-	// keep as last call in this array
+	Spare,// keep as last call in this array
 	communication_check_rx_uart1,
 	SetPwmOutput, //Spare, //communication_check_rx_uart2,
 	communication_check_rx_ble,
 	communication_check_tx_uart1,
-	Spare, //communication_check_tx_uart2,
+	//Spare, //communication_check_tx_uart2,
 	communication_check_tx_ble,
+	SetPwmOutput,
 	cmd_sequener,
 };
 
@@ -141,5 +141,5 @@ void taskmanager_init()
 		.name = "systick timer"
 	};
 	esp_timer_create(&systickTimerArgs, &systickTimer); // Create the timer
-	esp_timer_start_periodic(systickTimer, 250); // Start the timer in automatic reload mode with a period of 125 microseconds
+	esp_timer_start_periodic(systickTimer, 156); // Start the timer in automatic reload mode with a period of 125 microseconds
 }

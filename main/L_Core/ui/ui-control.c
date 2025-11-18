@@ -45,11 +45,12 @@ void ui_control_refresh() {
 	sprintf(ui_temp_string, "%.1f%c", pcnt_info.bat_volt, '%');
 	lv_label_set_text(ui_control.battery, ui_temp_string);
 	
-	sprintf(ui_temp_string, "%.1f'C", pcnt_info.temperature);
+	sprintf(ui_temp_string, "%.2f'C", pcnt_info.temperature);
 	lv_label_set_text(ui_control.temp, ui_temp_string);//pcnt_info.temperature
 
-	
-	sprintf(ui_temp_string, "%d%c", pcnt_info.duty, '%');
+	int CalcDuty = pcnt_info.duty * 6;
+	if (CalcDuty > 100)CalcDuty = 100;
+	sprintf(ui_temp_string, "%d%c", CalcDuty, '%');
 	lv_label_set_text(ui_control.duty, ui_temp_string);
 
 	lv_label_set_text_fmt(ui_control.raw_cnt1, "%d", pcnt_info.count01);

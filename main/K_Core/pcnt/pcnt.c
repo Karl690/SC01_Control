@@ -130,12 +130,13 @@ void Calculate_Heater_DutyCycle() {
 void SetPwmOutput()
 {
 	
-	//test pulse 
-	systemconfig.pcnt.duty_test++; //count up
+
 	PwmTimerReloadRegister++;
-	if (PwmTimerReloadRegister > 32)PwmTimerReloadRegister = 0;
-	//if (pcnt_info.duty > PwmTimerReloadRegister)
-	if (systemconfig.pcnt.duty_test & 0x0001)
+	if (PwmTimerReloadRegister > 15)PwmTimerReloadRegister = 0;
+			//test pulse 
+	//systemconfig.pcnt.duty_test++; //count up
+	//if (systemconfig.pcnt.duty_test & 0x0001)
+		if (pcnt_info.duty > PwmTimerReloadRegister)
 	{
 		gpio_set_level(ControlOutput_PIN, 1); //disable the heater until code is stable
 	}
@@ -204,11 +205,11 @@ float convertRtdDataFromRawADCValue(const PcntTableStruct* adcTable, float RTD_V
 void Read_Counters() {
 	//reads both counter1 and 2, then resets counters to 0, used in 100hz loop
 	//so we are actually getting frequency in 100 hz resolution
-	ESP_ERROR_CHECK(pcnt_unit_get_count(PulseCounter_1, &pcnt_info.count01));
+	ESP_ERROR_CHECK(pcnt_unit_get_count(PulseCounter_1, &pcnt_info.count02));
 	ESP_ERROR_CHECK(pcnt_unit_clear_count(PulseCounter_1));
 
 
-	ESP_ERROR_CHECK(pcnt_unit_get_count(PulseCounter_2, &pcnt_info.count02));
+	ESP_ERROR_CHECK(pcnt_unit_get_count(PulseCounter_2, &pcnt_info.count01));
 	ESP_ERROR_CHECK(pcnt_unit_clear_count(PulseCounter_2));
 
 	//now process the variables into voltage
@@ -231,7 +232,7 @@ void Read_Counters() {
 	RtdVoltage = (float)((float)TemperatureFreq / 3200); //systemconfig.pcnt.rtd_scale;
 	pcnt_info.rtd_volt = RtdVoltage; //update global
 	//battery voltage next
-	BatteryVoltage = (float)((float)Battery_V_Freq / 526); //systemconfig.pcnt.battery_scale;
+	BatteryVoltage = (float)((float)Battery_V_Freq / 337); //systemconfig.pcnt.battery_scale;
 	pcnt_info.bat_volt = BatteryVoltage; //update global variable
 	//convert to temperature
 	Temperature = convertRtdDataFromRawADCValue(RtdTable_1K, (RtdVoltage*systemconfig.pcnt.rtd_scale)); //use lookup table to convert voltage to temperature
