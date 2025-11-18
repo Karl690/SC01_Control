@@ -10,6 +10,9 @@
 #define PCNT_TEMP_SCAL_VALUE       1.00
 #define PCNT_DUTY_SCAL_VALUE       1.0
 
+#define PCNT_BATTERY_EMPTY 				6.0
+#define PCNT_BATTERY_FULL				9.0
+ 
 typedef struct 
 {
 	int count01;

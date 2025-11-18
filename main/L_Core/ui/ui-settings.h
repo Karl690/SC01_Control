@@ -3,6 +3,7 @@
 
 typedef enum
 {
+	SETTINGS_SUBMENU_MODE,
 	SETTINGS_SUBMENU_BLUETOOTH,
 	SETTINGS_SUBMENU_WIFI,
 	SETTINGS_SUBMENU_OPC,
@@ -12,6 +13,10 @@ typedef enum
 	SETTINGS_SUBMENU_SDCARD,
 	SETTINGS_SUBMENU_SYSTEM,
 }SETTINGS_SUBMENU_TYPE;
+typedef struct
+{
+	lv_obj_t* option;
+} UI_SETTINGS_MODE;
 
 typedef struct
 {
@@ -58,8 +63,10 @@ typedef struct
 	lv_obj_t* ui_timer_reload2;
 	lv_obj_t* ui_timer_retry;
 } UI_SETTINGS_SECS;
+
 typedef struct
 {
+	UI_SETTINGS_MODE ui_mode;
 	UI_SETTINGS_WIFI ui_wifi;
 	UI_SETTINGS_BLUETOOTH ui_bluetooth;
 	UI_SETTINGS_OPC ui_opc;

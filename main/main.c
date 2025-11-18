@@ -139,20 +139,6 @@ bool load_configu_from_ssd() {
 					value = parseValue(line); if (value) systemconfig.bluetooth.autostart = atoi(value);
 				}
 				break;
-			case SESSION_OPC:
-				if (strstr(line, "autostart"))
-				{
-					value = parseValue(line); if (value) systemconfig.opc.autostart = atoi(value);
-				}
-				else if (strstr(line, "username"))
-				{
-					value = parseValue(line); if (value) strcpy((char*)systemconfig.opc.username, value);
-				}
-				else if (strstr(line, "userpassword"))
-				{
-					value = parseValue(line); if (value) strcpy((char*)systemconfig.opc.userpassword, value);
-				}
-				break;
 			default:
 				break;
 			}
@@ -188,10 +174,6 @@ bool save_configu_to_ssd() {
 	strcpy(line, "[bluetooth]\n"); fwrite(line, 1, strlen(line), fp);
 	sprintf(line, "autostart=%d\n", systemconfig.bluetooth.autostart); fwrite(line, 1, strlen(line), fp);
 	
-	strcpy(line, "[opc]\n"); fwrite(line, 1, strlen(line), fp);
-	sprintf(line, "autostart=%d\n", systemconfig.opc.autostart); fwrite(line, 1, strlen(line), fp);
-	sprintf(line, "username=%s\n", systemconfig.opc.username); fwrite(line, 1, strlen(line), fp);
-	sprintf(line, "userpassword=%s\n", systemconfig.opc.userpassword); fwrite(line, 1, strlen(line), fp);
 	fclose(fp);
 	return true;
 }

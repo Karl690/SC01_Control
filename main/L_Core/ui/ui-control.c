@@ -11,6 +11,7 @@ void ui_control_button_handler(lv_event_t * e) {
 	systemconfig.pcnt.enabled = systemconfig.pcnt.enabled == 1 ? 0 : 1;
 	ui_change_button_color(obj, systemconfig.pcnt.enabled == 1? 0x00ff00 : 0xff0000, 0xffffff);
 	ui_change_button_text(obj, systemconfig.pcnt.enabled? "ON": "OFF");
+	save_configuration();
 	// ui_show_messagebox(systemconfig.pcnt.enabled ? MESSAGEBOX_INFO: MESSAGEBOX_ERROR, systemconfig.pcnt.enabled ? "TEMP CTRL is enabled" : "TEMP CTRL is disabled" , 1000);
 }
 
@@ -42,25 +43,26 @@ void ui_control_refresh() {
 
 	lv_label_set_text_fmt(ui_control.hb, "HB: %d", HeartBeat);
 
-	sprintf(ui_temp_string, "%.1f%c", pcnt_info.bat_volt, '%');
-	lv_label_set_text(ui_control.battery, ui_temp_string);
-	
 	sprintf(ui_temp_string, "%.1f'C", pcnt_info.temperature);
 	lv_label_set_text(ui_control.temp, ui_temp_string);//pcnt_info.temperature
 
 	int CalcDuty = pcnt_info.duty * 6;
-	if (CalcDuty > 100)CalcDuty = 100;
+	if (CalcDuty > 100) CalcDuty = 100;
 	sprintf(ui_temp_string, "%d%c", CalcDuty, '%');
 	lv_label_set_text(ui_control.duty, ui_temp_string);
 
 	lv_label_set_text_fmt(ui_control.raw_cnt1, "%d", pcnt_info.count01);
 	lv_label_set_text_fmt(ui_control.raw_cnt2, "%d", pcnt_info.count02);
 
-	int bat = 10 - ceil(pcnt_info.bat_volt / 10);
+	float bat_percent = (pcnt_info.bat_volt - PCNT_BATTERY_EMPTY) / (PCNT_BATTERY_FULL - PCNT_BATTERY_EMPTY) * 100;
+	if (bat_percent < 0) bat_percent = 0;
+	sprintf(ui_temp_string, "%.1f%c", bat_percent, '%');
+	lv_label_set_text(ui_control.battery, ui_temp_string);
+	int bat_level = 10 - ceil(bat_percent / 10);
 	lv_obj_t* obj;
 	for(int i = 9; i >= 0; i --) {
 		obj = lv_obj_get_child(ui_control.battery_panel, i);
-		if (i < bat) {
+		if (i < bat_level) {
 			lv_obj_set_style_bg_color(obj, lv_color_hex(0x444444), LV_PART_MAIN);
 		} else {
 			lv_obj_set_style_bg_color(obj, lv_color_hex(0x00ff24), LV_PART_MAIN);
@@ -89,14 +91,14 @@ void ui_control_screen_init()
 	lv_obj_set_style_bg_color(panel, lv_color_hex(0x0), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_pos(panel, 0, 45);
 
-	lv_obj_t* obj = ui_create_label(panel, "HB: ", &lv_font_montserrat_16);
+	lv_obj_t* obj = ui_create_label(ui_control_screen, "HB: ", &lv_font_montserrat_16);
 	lv_obj_set_style_text_color(obj, lv_color_hex(0xfffffff), LV_PART_MAIN);
-	lv_obj_set_pos(obj, 5, 2);
+	lv_obj_set_pos(obj, 5, 5);
 	ui_control.hb = obj;
 
-	obj = ui_create_button(panel, systemconfig.pcnt.enabled ? "ON": "OFF", 120, 100, 10, &lv_font_montserrat_48, ui_control_button_handler, (void*)NULL);
+	obj = ui_create_button(panel, systemconfig.pcnt.enabled ? "ON": "OFF", 120, 130, 10, &lv_font_montserrat_48, ui_control_button_handler, (void*)NULL);
 	ui_change_button_color(obj, systemconfig.pcnt.enabled == 1? 0x00ff00 : 0xff0000, 0xffffff);
-	lv_obj_set_pos(obj, 5, 30);
+	lv_obj_set_pos(obj, 5, 5);
 
 	obj = ui_create_label(panel, "TEMP", &lv_font_montserrat_16);
 	lv_obj_set_style_text_color(obj, lv_color_hex(0xeeeeee), LV_PART_MAIN);
@@ -136,7 +138,7 @@ void ui_control_screen_init()
 	lv_obj_set_style_text_color(obj, lv_color_hex(0xeeeeee), LV_PART_MAIN);
 	lv_obj_set_pos(obj, 90, 150);
 	
-	obj = ui_create_label(panel, "60'c", &lv_font_montserrat_30);
+	obj = ui_create_label(panel, "#'c", &lv_font_montserrat_30);
 	lv_obj_set_style_text_color(obj, lv_color_hex(0x1df5fd), LV_PART_MAIN);
 	lv_obj_set_pos(obj, 90, 180);
 	ui_control.programmed_temp = obj;
@@ -149,7 +151,7 @@ void ui_control_screen_init()
 	lv_obj_set_style_text_color(obj, lv_color_hex(0xeeeeee), LV_PART_MAIN);
 	lv_obj_set_pos(obj, 280, 150);
 
-	obj = ui_create_label(panel, "100%", &lv_font_montserrat_30);
+	obj = ui_create_label(panel, "#%", &lv_font_montserrat_30);
 	lv_obj_set_style_text_color(obj, lv_color_hex(0x1df5fd), LV_PART_MAIN);
 	lv_obj_set_pos(obj, 280, 180);
 	ui_control.duty = obj;

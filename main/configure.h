@@ -76,12 +76,16 @@ typedef struct
 	int duty_test;
 } PCNT_CONFIG;
 
+typedef struct {
+	uint8_t option;
+} MODE_CONFIG;
+
 typedef struct 
 {
 	uint8_t initialized;
 	WIFI_CONFIG wifi;
 	BLUETOOTH_CONFIG bluetooth;
-	OPC_CONFIG opc;
+//	OPC_CONFIG opc;
 	SDCARD_CONFIG sdcard;
 	SERIAL_CONFIG serial1;
 	SERIAL_CONFIG serial2;
@@ -90,5 +94,6 @@ typedef struct
 	uint8_t ScreenControlEnabled;
 	uint8_t server_base_address;
 	uint8_t can_address;
+	MODE_CONFIG mode;
 	
 }SYSTEMCONFIG;
