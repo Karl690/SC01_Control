@@ -494,7 +494,20 @@ void ui_update_timer(lv_timer_t * timer)
 	{
 		ui_call_button_event(ui_request_screen_id, ui_request_button_id, false);
 		ui_request_update = false;
-	}	
+	}
+
+	switch (ui_current_screen)
+	{
+	case SCREEN_MEG:
+		ui_pct_refresh();
+		break;
+	case SCREEN_CONTROLS:
+		ui_control_refresh();
+		break;
+	
+	default:
+		break;
+	}
 }
 void InitUI( void )
 {
@@ -529,7 +542,7 @@ void InitUI( void )
 	//lv_scr_load_anim(ui_home_screen, LV_SCR_LOAD_ANIM_FADE_ON, 300, 0, false);
 	ui_transform_screen(SCREEN_CONTROLS);
 
-	lv_timer_create(ui_update_timer, 200, NULL);
+	lv_timer_create(ui_update_timer, 500, NULL);
 }
 
 

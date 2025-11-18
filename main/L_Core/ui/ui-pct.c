@@ -80,7 +80,7 @@ void ui_pct_event_button_cb(lv_event_t* e)
 	ui_pct_call_event_button(code, true);	
 }
 
-void ui_pct_update_lines_timer(lv_timer_t * timer)
+void ui_pct_refresh()
 {
 	if (ui_pct_is_update_button) {
 		ui_change_button_color(ui_pct_keyboard[ui_pct_index_bg_color], ui_pct_bg_color, UI_BUTTON_NORMAL_FG_COLOR);
@@ -187,7 +187,7 @@ void ui_pct_screen_init(void)
 	ui_pct_label_lines[2] = ui_pct_line_2;
 	ui_pct_label_lines[3] = ui_pct_line_3;
 	ui_pct_label_lines[4] = ui_pct_line_4;
-	lv_timer_create(ui_pct_update_lines_timer, 10, NULL);
+	// lv_timer_create(ui_pct_update_lines_timer, 10, NULL);
 }
 
 void ui_pct_update_label_text(int index, char* value)

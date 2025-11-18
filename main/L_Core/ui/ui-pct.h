@@ -12,3 +12,4 @@ void ui_pct_update_button_text(int index, char* value);
 void ui_pct_update_button_color(int index, char* value);
 
 void ui_pct_call_event_button(uint8_t code, bool direct);
+void ui_pct_refresh();

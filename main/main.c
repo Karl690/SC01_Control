@@ -85,6 +85,7 @@ bool load_configuration()
 	if (systemconfig.pcnt.rtd_scale == 0.0f) systemconfig.pcnt.rtd_scale = PCNT_RTD_SCAL_VALUE;
 	if (systemconfig.pcnt.duty_scale == 0.0f) systemconfig.pcnt.duty_scale = PCNT_DUTY_SCAL_VALUE;
 	if (systemconfig.pcnt.duty_test != 0.0f) systemconfig.pcnt.duty_test = 0;
+	ESP_LOGI(TAG, "PROG TEMP %d", systemconfig.pcnt.programmed_temperature);
 	return true;
 }
 bool load_configu_from_ssd() {
@@ -163,7 +164,10 @@ bool load_configu_from_ssd() {
 bool save_configuration()
 {
 	systemconfig.initialized = 1;
-	return storage_nvs_set_blob(NVS_KEY_CONFIG, &systemconfig, sizeof(SYSTEMCONFIG));
+	if (!storage_nvs_set_blob(NVS_KEY_CONFIG, &systemconfig, sizeof(SYSTEMCONFIG))) {
+		ESP_LOGE(TAG, "SAVE CONFIG FAILED");
+	}
+	return true;
 	//return storage_partition_write(STORAGE_ADDRESS_SETTINGS, &systemconfig, sizeof(SYSTEMCONFIG));
 }
 bool save_configu_to_ssd() {
