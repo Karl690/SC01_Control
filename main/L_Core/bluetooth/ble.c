@@ -2,7 +2,6 @@
 #include "ble.h"
 #include "../ui/ui-bluetooth.h"
 
-
 BleRemoteDevice ble_client_remote_device[BLE_CLIENT_MAX_CONNECT_NUM];
 uint8_t ble_rx_buffer[RX_BUF_SIZE];
 uint8_t ble_tx_buffer[TX_BUF_SIZE];

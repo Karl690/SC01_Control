@@ -102,6 +102,7 @@ void communication_add_char_to_serial_buffer(ComBuffer *targetBuffer, uint8_t Ra
 
 void communication_add_char_to_ble_buffer(ComBuffer *targetBuffer, uint8_t RawChar)
 {
+	if (ble_server_status != BLE_SERVER_PAIRED) return;
 	targetBuffer->buffer[targetBuffer->Head] = RawChar;
 	targetBuffer->Head++;
 	targetBuffer->Head &= (targetBuffer->Buffer_Size - 1);
@@ -109,6 +110,7 @@ void communication_add_char_to_ble_buffer(ComBuffer *targetBuffer, uint8_t RawCh
 
 void communication_add_buffer_to_ble_buffer(ComBuffer *targetBuffer, uint8_t* buf, uint16_t size)
 {
+	if (ble_server_status != BLE_SERVER_PAIRED) return;
 	uint16_t index = 0;
 	for (index = 0; index < size; index++)
 	{
@@ -119,6 +121,7 @@ void communication_add_buffer_to_ble_buffer(ComBuffer *targetBuffer, uint8_t* bu
 }
 void communication_add_string_to_ble_buffer(ComBuffer *targetBuffer, char* SourceString)
 {
+	if (ble_server_status != BLE_SERVER_PAIRED) return;
 	uint16_t size = strlen(SourceString);
 	communication_add_buffer_to_ble_buffer(targetBuffer, (uint8_t*)SourceString, size);
 }
