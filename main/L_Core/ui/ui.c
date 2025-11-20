@@ -5,7 +5,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-
+#include "L_Core/devices/display.h"
 #include "ui.h"
 #include "ui_helpers.h"
 //#include "images/resource_img.h"

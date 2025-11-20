@@ -1,6 +1,6 @@
 
+#include "sequencer.h"
 #include "cmdprocessor.h"
-#include "bcode.h"
 #include "L_Core/bluetooth/ble.h"
 #include "L_Core/ui/ui.h"
 #include "L_Core/ui/ui-comm.h"
@@ -13,6 +13,9 @@
 #include "K_Core/amplifier/amplifier.h"
 #include "K_Core/simple/simple.h"
 #include "K_Core/secs/secs.h"
+
+uint32_t CommandsInQue = 0;
+uint32_t CommandsInUrgentQue = 0;
 uint32_t cmd_NextCommandInsertionPointer = 1;
 uint32_t cmd_CurrentPointer = 1;
 uint32_t cmd_CommandsInQue = 0;
@@ -20,7 +23,7 @@ char cmd_CommandsInQueBuffer[SIZE_OF_COMMAND_QUEUE][MAX_COMMAND_LEN];
 uint32_t cmd_start_freq = 9300;
 uint32_t cmd_stop_freq = 9800;
 uint32_t cmd_freq_inc = 100;
-GMBCOMMAND cmd_Command;
+
 char cmdproc_temp[256];
 char lineIndexBuffer[5];
 CMD_REPORT_INFO cmd_report_que[0x10];
@@ -35,6 +38,10 @@ uint16_t downloadedProgrammedPower = 0;
 bool cmd_sending_log = false;
 FILE* cmd_log_fp = NULL;
 
+uint32_t NextCommandInsertionPointer=1;
+
+
+
 int findOfStartOnString(char* cmd)
 {
 	char* temp = strstr(cmd, "*"); // cmd.IndexOf("*");
@@ -48,6 +55,7 @@ void cmd_sequener()
     if(!cmd_CommandsInQue) return;						//no commands to proces, so return
     char* cmd = &cmd_CommandsInQueBuffer[cmd_CurrentPointer][0];
 	int len = strlen(cmd);
+	ESP_LOGI(TAG, "CMD: %s", cmd);
 	if (cmd[len - 1] == '\n') cmd[len - 1] = '\0'; //remove  '\n'
 	parseLineCommandData(cmd);
 	ui_comm_add_log(cmd, UI_RECEIVE_COLOR);
@@ -629,4 +637,20 @@ void processBleSendLogFile(char* cmd)
 		}
 		break;
 	}
+}
+
+
+void processArgs(char *WorkBuffer,float *OutPutVariable)
+{
+	if (*WorkBuffer == 0)return;//if first chacter is null, return
+
+	//WorkBuffer++;//MOVE OVER 1 CHAR SO WE CAN PROCESS THE NUMBER, NOT THE KEY LETTER
+	if (*WorkBuffer==0)
+	{   // no value to convert
+		// ProcessingError = 1;
+		*OutPutVariable = INVALID_ARG_VALUE;//set to invalid value so we will not accidentally take a zero as a position or temperature argument
+		return;
+	}
+	WorkBuffer++;//point to second charcter please, the first is the key character
+	*OutPutVariable =(float) atof(WorkBuffer);//start with the second character in the string, because the first character is the argument header char, like M or G or X  etc.
 }

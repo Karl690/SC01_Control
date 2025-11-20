@@ -86,7 +86,9 @@ idf_component_register(
                 	K_Core/adc/adc-table.c
                 	K_Core/communication/communication.c
                 	K_Core/communication/parser.c
+					K_Core/execution/sequencer.c
                 	K_Core/execution/cmdprocessor.c
+					K_Core/execution/M_Codes.c
                 	K_Core/amplifier/amplifier.c
 					K_Core/pcnt/pcnt.c
                 INCLUDE_DIRS "."

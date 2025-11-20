@@ -11,6 +11,9 @@
 #include "K_Core/simple/simple.h"
 #include "K_Core/amplifier/amplifier.h"
 #include "K_Core/pcnt/pcnt.h"
+#include "K_Core/communication/communication.h"
+#include "K_Core/execution/sequencer.h"
+
 esp_timer_handle_t systickTimer;
 
 
@@ -36,9 +39,9 @@ const PFUNC F100HZ[NUM_100HZ] =
 	adc_get_process_rawdata,
 	simple_parse_command, //serial_uart_check_rxtx, //Spare,
 	simple_send_dump_screen, //serial_rs485_check_rxtx, //Spare,
-	Spare,
+	ProcessAsciiArgs2,
 	Read_Counters,
-	Spare,
+	Sequencer,
 	Spare,
 };
 

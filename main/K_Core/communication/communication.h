@@ -87,6 +87,7 @@ typedef struct {
 	AsciArgs  AsciiArgs; //ascii buffers for each key character and their values in ascii, will convert to floats
 	char command[CMD_MAX_SIZE]; //how many charcters the incoming argument is so far
 	char* commandPtr;
+	uint8_t CommentFlag;
 } ComBuffer;
 
 typedef struct {
@@ -123,13 +124,14 @@ typedef struct {
 
 typedef struct {
 	int				ble_id; //device id
-	BleBuffer       RxBuffer; //standard incoming receive buffer, circular
-	BleBuffer RxUrgentBuffer; //Priority Gocode rx buffer, bypasses big input que to execute in front of qued commands
-	BleBuffer       TxBuffer; //outgoing characters in que
+	ComBuffer       RxBuffer; //standard incoming receive buffer, circular
+	ComBuffer 		RxUrgentBuffer; //Priority Gocode rx buffer, bypasses big input que to execute in front of qued commands
+	ComBuffer       TxBuffer; //outgoing characters in que
 	uint32_t      UrgentFlag; //set when 911 character is received, signifying the beginning of a priority gcode line
 	uint32_t     AcksWaiting; //acknowledge waiting to implement Handshake	
 	char			CommandLineBuffer[256];
 	uint8_t			CommandLineIdx;
+	int		 RxAcknowledgeCounter; //this flag tells the TX to send an ackowledge after we receive a command line
 } BleDevice;
 
 
@@ -146,9 +148,9 @@ void communication_add_buffer_to_serial_buffer(ComBuffer *targetBuffer, uint8_t*
 void communication_add_string_to_serial_buffer(ComBuffer *targetBuffer, char* SourceString);
 void communication_add_char_to_serial_buffer(ComBuffer *targetBuffer, uint8_t RawChar);
 
-void communication_add_char_to_ble_buffer(BleBuffer *targetBuffer, uint8_t RawChar);
-void communication_add_buffer_to_ble_buffer(BleBuffer *targetBuffer, uint8_t* buf, uint16_t len);
-void communication_add_string_to_ble_buffer(BleBuffer *targetBuffer, char* SourceString);
+void communication_add_char_to_ble_buffer(ComBuffer *targetBuffer, uint8_t RawChar);
+void communication_add_buffer_to_ble_buffer(ComBuffer *targetBuffer, uint8_t* buf, uint16_t len);
+void communication_add_string_to_ble_buffer(ComBuffer *targetBuffer, char* SourceString);
 void communication_check_tx_uart1();
 void communication_check_tx_uart2();
 void communication_check_tx_ble();
@@ -160,3 +162,5 @@ void communication_tx_commandline(COMPORT* comport, char* commandline);
 
 void SendPing();
 void SendDisplayStatusCode(bool isEnable);
+
+void AddCharacterToAsciiArgs(BleDevice *WorkPort, uint8_t RawRxChar);

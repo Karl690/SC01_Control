@@ -230,3 +230,9 @@ void touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 	}
 	force_touch = false;
 }
+
+void display_rotate(int direction) {
+	lcd.setRotation(direction);
+	lv_disp_t* disp = lv_disp_get_default();
+	lv_disp_set_rotation(disp, (lv_disp_rot_t)direction);
+}

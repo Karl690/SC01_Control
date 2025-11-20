@@ -100,14 +100,14 @@ void communication_add_char_to_serial_buffer(ComBuffer *targetBuffer, uint8_t Ra
 }
 
 
-void communication_add_char_to_ble_buffer(BleBuffer *targetBuffer, uint8_t RawChar)
+void communication_add_char_to_ble_buffer(ComBuffer *targetBuffer, uint8_t RawChar)
 {
 	targetBuffer->buffer[targetBuffer->Head] = RawChar;
 	targetBuffer->Head++;
 	targetBuffer->Head &= (targetBuffer->Buffer_Size - 1);
 }
 
-void communication_add_buffer_to_ble_buffer(BleBuffer *targetBuffer, uint8_t* buf, uint16_t size)
+void communication_add_buffer_to_ble_buffer(ComBuffer *targetBuffer, uint8_t* buf, uint16_t size)
 {
 	uint16_t index = 0;
 	for (index = 0; index < size; index++)
@@ -117,7 +117,7 @@ void communication_add_buffer_to_ble_buffer(BleBuffer *targetBuffer, uint8_t* bu
 		targetBuffer->Head &= (targetBuffer->Buffer_Size - 1);
 	}
 }
-void communication_add_string_to_ble_buffer(BleBuffer *targetBuffer, char* SourceString)
+void communication_add_string_to_ble_buffer(ComBuffer *targetBuffer, char* SourceString)
 {
 	uint16_t size = strlen(SourceString);
 	communication_add_buffer_to_ble_buffer(targetBuffer, (uint8_t*)SourceString, size);
@@ -262,7 +262,7 @@ void communication_process_rx_serial(COMPORT* WorkingComPort)
 void communication_process_rx_ble(BleDevice* device)
 {
 	if (device->RxBuffer.Head == device->RxBuffer.Tail)return;//nothing to 
-	BleBuffer* SourceBuff = &device->RxBuffer;
+	ComBuffer* SourceBuff = &device->RxBuffer;
 	uint8_t i = 0;
 	char WorkRxChar;
 	uint32_t idx = 0; 
@@ -280,6 +280,7 @@ void communication_process_rx_ble(BleDevice* device)
 			//communication_add_char_to_serial_buffer(TargetBuff, WorkRxChar);
 			device->CommandLineBuffer[device->CommandLineIdx] = WorkRxChar;
 			device->CommandLineIdx++;
+			AddCharacterToAsciiArgs(device, WorkRxChar); //plug in the gcode arg
 			if (idx >= 254)
 			{
 				device->CommandLineBuffer[254] = CMD_END_CHAR;
@@ -320,8 +321,9 @@ void communication_process_rx_ble(BleDevice* device)
 				}
 				break;
 			case PING_CHAR:     //if (rawChar==7)
-				if (run_mode == RUN_BLE_SERVER)
-					communication_add_char_to_serial_buffer(&MegComPort->TxBuffer, PING_REPLY);
+				// if (run_mode == RUN_BLE_SERVER)
+				// 	communication_add_char_to_serial_buffer(&MegComPort->TxBuffer, PING_REPLY);
+				communication_add_char_to_ble_buffer(&bleDevice.TxBuffer, PING_REPLY);
 				break;
 			case ABORT_CHAR:  
 				break;
@@ -545,4 +547,102 @@ void SendDisplayStatusCode(bool isEnable)
 {
 	communication_add_char_to_serial_buffer(&MegComPort->TxBuffer, isEnable? 0x5: 0x4);
 	ui_comm_add_event((const char*)isEnable ? "Serial Display enabled 0x5" : "Serial Display disabled 0x4", UI_SEND_COLOR, false);
+}
+
+
+void AddCharacterToAsciiArgs(BleDevice *WorkPort, uint8_t RawRxChar)
+{
+	//AddSerialCharToBuffer(&WorkPort->TxBuffer,RawRxChar); //echo the characters so we can diagnose the problem
+	ComBuffer* SourceBuffer = &WorkPort->RxBuffer;//get the RxBuffer where the characters will come from.
+	if (SourceBuffer->ReadyForAtof == 1) return;//process NOTHING if we do not have space....
+//	while (SourceBuffer->Head != SourceBuffer->Tail)
+//	{
+//		RawRxChar = WorkBuff->buffer[WorkBuff->Tail]; //update the work character
+//		WorkBuff->Tail++;
+//		WorkBuff->Tail &= (WorkBuff->Buffer_Size - 1);
+
+		if (SourceBuffer->CommentFlag>0)		//in comment mode, we should plug into a comment buffer for large transfers
+		{//handle comments please
+			if (RawRxChar == CMD_END_CHAR)
+			{//purge till we see a cr, eol
+				SourceBuffer->ReadyForAtof = 1;//we are ready to process the line, so flip up the convert to float flag
+				*SourceBuffer->GCodeArgPtr++ = 0;//increment one more position in the character buffer and
+				SourceBuffer->CommentFlag = 0;//stuff a NULL  (0) to indicate END OF STRING for that argument.
+				WorkPort->RxAcknowledgeCounter++; //now you can also send an ACK back to who ever sent this nice command line
+				ESP_LOGI(TAG, "Parsing command completed");
+				return;
+			}else 
+			{
+				*SourceBuffer->GCodeArgPtr++=RawRxChar;
+				return;
+			}
+			//continue;//dont process comments for now
+		}
+		//debug only  AddSerialCharToBuffer(&WorkPort->TxBuffer, RawRxChar); //echo the characters so we can diagnose the problem
+		switch (RawRxChar)
+		{
+		case CMD_END_CHAR:
+			SourceBuffer->ReadyForAtof =1;
+			*SourceBuffer->GCodeArgPtr++ = 0; //increment one more position in the character buffer and
+			SourceBuffer->CommentFlag = 0; //stuff a NULL  (0) to indicate END OF 
+			WorkPort->RxAcknowledgeCounter++;
+			return;
+			//this section is valid variable charcaters, that can be converted by Atof(string) function
+		case '1': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		case '2': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		case '3': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		case '4': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		case '5': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		case '6': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		case '7': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		case '8': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		case '9': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		case '0': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		case '.': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		case '-': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		case '+': *SourceBuffer->GCodeArgPtr=RawRxChar;SourceBuffer->GCodeArgPtr++;*SourceBuffer->GCodeArgPtr=0; break;//load char, and set next as null
+		//end of valid variable characters
+		case ' ':   break;//*GCodeArgPtr=' ';GCodeArgPtr++;*GCodeArgPtr=0; break;//POINT TO THE NEXT POSITION PLEASE
+
+		//this is the beginning of the KEY characters in gcode
+		case 'A': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgA; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'B': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgB; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'C': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgC; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'D': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgD; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'E': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgE; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'F': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgF; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'G': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgG; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'H': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgH; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'I': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgI; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'J': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgJ; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'K': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgK; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'L': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgL; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'M': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgM; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'N': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgN; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'O': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgO; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'P': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgP; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'Q': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgQ; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'R': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgR; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'S': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgS; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'T': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgT; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'U': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgU; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'V': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgV; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'W': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgW; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'X': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgX; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'Y': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgY; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case 'Z': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgZ; *SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		//
+
+		case '*': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgSplat;*SourceBuffer->GCodeArgPtr++=RawRxChar;SourceBuffer->ArgumentLength=0; return;
+		case '/':
+		case ';': SourceBuffer->GCodeArgPtr = (char*)&SourceBuffer->AsciiArgs.GCodeArgComment; SourceBuffer->CommentFlag = 1; SourceBuffer->ArgumentLength=0; return;
+//					commentFlag=1;*WorkBuff->GCodeArgPtr++=RawRxChar;WorkBuff->ArgumentLength=0; return;
+		}
+		SourceBuffer->ArgumentLength++;
+		if (SourceBuffer->ArgumentLength >= (!SourceBuffer->CommentFlag ? MAX_CHARS_FOR_PARAMETER : COMMENT_STRING_LENGTH))  // -1 because need room for the NULL
+		{
+			// ProcessingError=1;
+			return;//just dont do anything yet
+		}
+	//}
 }

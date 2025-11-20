@@ -13,6 +13,7 @@ typedef enum
 
 typedef struct _tagUiControl {
 	lv_obj_t* hb;
+	lv_obj_t* onoff;
 	lv_obj_t* temp;
 	lv_obj_t* programmed_temp;
 	lv_obj_t* duty;

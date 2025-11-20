@@ -86,3 +86,5 @@ void touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data);
 
 bool display_dump_buffer();
 void display_reset_capture_buffer();
+
+void display_rotate(int direction);

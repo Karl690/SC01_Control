@@ -9,8 +9,7 @@ UI_CONTROL ui_control;
 void ui_control_button_handler(lv_event_t * e) {
 	lv_obj_t* obj = lv_event_get_target(e);
 	systemconfig.pcnt.enabled = systemconfig.pcnt.enabled == 1 ? 0 : 1;
-	ui_change_button_color(obj, systemconfig.pcnt.enabled == 1? 0x00ff00 : 0xff0000, 0xffffff);
-	ui_change_button_text(obj, systemconfig.pcnt.enabled? "ON": "OFF");
+	
 	save_configuration();
 	// ui_show_messagebox(systemconfig.pcnt.enabled ? MESSAGEBOX_INFO: MESSAGEBOX_ERROR, systemconfig.pcnt.enabled ? "TEMP CTRL is enabled" : "TEMP CTRL is disabled" , 1000);
 }
@@ -42,6 +41,9 @@ void ui_control_temp_ctrl_handler(lv_event_t* e) {
 void ui_control_refresh() {
 
 	lv_label_set_text_fmt(ui_control.hb, "HB: %d", HeartBeat);
+
+	ui_change_button_color(ui_control.onoff, systemconfig.pcnt.enabled == 1? 0x00ff00 : 0xff0000, 0xffffff);
+	ui_change_button_text(ui_control.onoff, systemconfig.pcnt.enabled? "ON": "OFF");
 
 	sprintf(ui_temp_string, "%.1f'C", pcnt_info.temperature);
 	lv_label_set_text(ui_control.temp, ui_temp_string);//pcnt_info.temperature
@@ -99,6 +101,7 @@ void ui_control_screen_init()
 	obj = ui_create_button(panel, systemconfig.pcnt.enabled ? "ON": "OFF", 120, 130, 10, &lv_font_montserrat_48, ui_control_button_handler, (void*)NULL);
 	ui_change_button_color(obj, systemconfig.pcnt.enabled == 1? 0x00ff00 : 0xff0000, 0xffffff);
 	lv_obj_set_pos(obj, 5, 5);
+	ui_control.onoff = obj;
 
 	obj = ui_create_label(panel, "TEMP", &lv_font_montserrat_16);
 	lv_obj_set_style_text_color(obj, lv_color_hex(0xeeeeee), LV_PART_MAIN);
