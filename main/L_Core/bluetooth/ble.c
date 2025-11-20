@@ -150,8 +150,8 @@ void ble_init()
 void ble_update_base_address()
 {
 	char sz[4] = { 0 };
-	sprintf(sz, "%03d", (int)systemconfig.server_base_address);
-	memcpy((char*)(raw_scan_rsp_data + 11), sz, 3);
+	sprintf(sz, "%02d", (int)systemconfig.server_base_address);
+	memcpy((char*)(raw_scan_rsp_data + BLE_RAW_RSP_DATA_SIZE - 4), sz, 2);
 	esp_ble_gap_config_scan_rsp_data_raw(raw_scan_rsp_data, BLE_RAW_RSP_DATA_SIZE);
 	ui_ble_set_servername((char*)(raw_scan_rsp_data + 2)); //it should start from 2 byte.
 }
@@ -159,13 +159,8 @@ void ble_update_base_address()
 void ble_update_name(int address)
 {
 	// set the device name with channel index
-	char a = address / 10;
-	char b = address % 10;
-	raw_scan_rsp_data[16] = '0' + a; //the second place from last point
-	raw_scan_rsp_data[17] = '0' + b; // the last point
-	esp_ble_gap_config_scan_rsp_data_raw(raw_scan_rsp_data, BLE_RAW_RSP_DATA_SIZE);
-	
-	ui_ble_set_servername((char*)(raw_scan_rsp_data + 2)); //it should start from 2 byte.
+	systemconfig.server_base_address = address;
+	ble_update_base_address();
 }
 
 char* ble_get_name()

@@ -133,16 +133,16 @@ void CheckBluetoothConnection(void)
 	if (ble_server_status == BLE_SERVER_PAIRED)
 	{
 		//now we can build and send the status screen
-		rptStr1[0] = 0; //set the pointer to null string
-		strcat(rptStr1, ">RT:T66 "); //set up the first template for the report of the temperature
-		sprintf(tmpStr1,
-			"%3.1f %d %1.2f %2.2f",
+		//rptStr1[0] = 0; //set the pointer to null string
+		// strcat(rptStr1, ">RT:T66 "); //set up the first template for the report of the temperature
+		sprintf(temp_string,
+			">RT:T66 %3.1f %d %1.2f %2.2f\n",
 			pcnt_info.temperature,
 			pcnt_info.duty,
 			pcnt_info.rtd_volt,
 			pcnt_info.bat_volt);
-		strcat(rptStr1, tmpStr1);
-
+		/// strcat(rptStr1, tmpStr1);
+		communication_add_string_to_ble_buffer(&bleDevice.TxBuffer, temp_string);
 		//communication_add_string_to_serial_buffer(ComBuffer *targetBuffer, rptStr1);
 	}
 }
