@@ -7,9 +7,9 @@
 #define AMPLIIFER_CSV_FILE SDCARD_MOUNT_POINT"/amplifier.csv"
 
 #define CMD_MAX_SIZE 50
-#define RX_BUF_SIZE  0x200
-#define TX_BUF_SIZE  0x200
-#define RX_URGENT_BUF_SIZE 0x200	//1k
+#define RX_BUF_SIZE  0x100
+#define TX_BUF_SIZE  0x100
+#define RX_URGENT_BUF_SIZE 0x100	//1k
 
 
 #define SCREEN_WIDTH	480

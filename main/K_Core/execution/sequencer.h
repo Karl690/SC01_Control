@@ -2,7 +2,7 @@
 #include "main.h"
 
 #define SIZE_OF_COMMAND_QUEUE 	10
-#define MAX_COMMAND_LEN 		50
+#define MAX_COMMAND_LEN 		30
 
 
 #define UNPROCESSED -1 // used to init cmdLink on cmdQue CleanUpPointers ARG_N_PRESENT
