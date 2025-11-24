@@ -5,7 +5,7 @@
 #define SAMPLE_TIME_MS      1000
 
 #define PCNT_BATTERY_SCAL_VALUE  3731.0
-#define PCNT_RTD_SCAL_VALUE      843.0
+#define PCNT_RTD_SCAL_VALUE      1270
 
 #define PCNT_TEMP_SCAL_VALUE       1.00
 #define PCNT_DUTY_SCAL_VALUE       1.0

@@ -120,7 +120,7 @@ void CheckBluetoothConnection(void)
 {
 	char rptStr1[64]; // local version of strings needed because this routine is called async
 	char tmpStr1[64]; // to all other process and would step on the other strings
-
+	if (HeartBeat & 0x001)return;
 //	if (ble_server_pairing_countdown > 0 && ble_server_status == BLE_SERVER_PAIRED)
 //	{
 //		// if keep the pairing status, close the connection.
