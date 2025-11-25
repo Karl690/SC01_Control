@@ -16,7 +16,7 @@ void ui_control_button_handler(lv_event_t * e) {
 	lv_obj_t* obj = lv_event_get_target(e);
 	systemconfig.pcnt.enabled = systemconfig.pcnt.enabled == 1 ? 0 : 1;
 	
-	ui_control_send_ble_command(CONTROLS_ONOFF);
+	ui_control_send_ble_command(TEMP_ONOFF);
 	save_configuration();
 	// ui_show_messagebox(systemconfig.pcnt.enabled ? MESSAGEBOX_INFO: MESSAGEBOX_ERROR, systemconfig.pcnt.enabled ? "TEMP CTRL is enabled" : "TEMP CTRL is disabled" , 1000);
 }
@@ -29,11 +29,11 @@ void ui_control_temp_ctrl_handler(lv_event_t* e) {
 	switch(code) {
 	case 0:
 		direction = -1;
-		ui_control_send_ble_command(CONTROLS_TEMP_DECREASE);
+		ui_control_send_ble_command(TEMP_DECREASE);
 		break;
 	case 1:
 		direction = 1;
-		ui_control_send_ble_command(CONTROLS_TEMP_INCREASE);
+		ui_control_send_ble_command(TEMP_INCREASE);
 		break;
 	}
 

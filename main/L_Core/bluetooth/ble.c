@@ -149,8 +149,8 @@ void ble_init()
 void ble_update_base_address()
 {
 	char sz[4] = { 0 };
-	sprintf(sz, "%02d", (int)systemconfig.server_base_address);
-	memcpy((char*)(raw_scan_rsp_data + BLE_RAW_RSP_DATA_SIZE - 4), sz, 2);
+	sprintf(sz, "%03d", (int)systemconfig.server_base_address);
+	memcpy((char*)(raw_scan_rsp_data + BLE_RAW_RSP_DATA_SIZE - 4), sz, 3);
 	esp_ble_gap_config_scan_rsp_data_raw(raw_scan_rsp_data, BLE_RAW_RSP_DATA_SIZE);
 	ui_ble_set_servername((char*)(raw_scan_rsp_data + 2)); //it should start from 2 byte.
 }

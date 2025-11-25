@@ -75,7 +75,7 @@ void ui_ble_setting_button_event_cb(lv_event_t* e)
 		systemconfig.server_base_address = lv_spinbox_get_value(ui_ble_address_spin);
 		save_configuration();
 		ble_update_base_address();
-		lv_label_set_text(ui_ble_server_name, lv_label_get_text(ui_ble_address_name));
+		lv_label_set_text(ui_ble_server_name, ble_get_name());
 	}
 	lv_obj_add_flag(ui_ble_msg, LV_OBJ_FLAG_HIDDEN);
 }
@@ -167,6 +167,7 @@ void ui_ble_server_updatename_event_cb(lv_event_t* e)
 {
 	requestBleNameTo407();
 }
+
 void ui_ble_scan_event_cb(lv_event_t* e) 
 {
 	//lv_obj_t * label = lv_obj_get_child(target, 0);
@@ -202,6 +203,7 @@ void ui_ble_timer_handler(lv_timer_t* timer)
 		lv_obj_set_style_text_color(ui_ble_server_receive_status, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);
 	}
 }
+
 void ui_ble_event_device_item_cb(lv_event_t* e) 
 {
 	//lv_obj_t * target = lv_event_get_target(e);
@@ -218,6 +220,7 @@ void ui_ble_send_event_cb(lv_event_t* e)
 	char* text = (char*)lv_textarea_get_text(textobj);
 	communication_add_string_to_ble_buffer(&bleDevice.TxBuffer, text);
 }
+
 void ui_ble_switch_event_cb(lv_event_t* e)
 {
 	uint8_t screen = (uint8_t)(int) e->user_data;	
@@ -237,7 +240,6 @@ void ui_ble_event_swap_cb(lv_event_t* e)
 {
 	ui_transform_screen(SCREEN_MEG);
 }
-
 
 void ui_ble_set_device_status(BleRemoteDevice* dev)
 {

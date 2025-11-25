@@ -2,9 +2,9 @@
 #include "ui.h"
 typedef enum
 {
-	CONTROLS_ONOFF,
-	CONTROLS_TEMP_DECREASE,
-	CONTROLS_TEMP_INCREASE,
+	TEMP_ONOFF,
+	TEMP_DECREASE,
+	TEMP_INCREASE,
 }CONTROLS_BUTTON_LIST;
 
 typedef struct _tagUiControl {
