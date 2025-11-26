@@ -11,8 +11,9 @@ PCNT_INFO pcnt_info = { 0, 0, 0, 0, 0, 0 };
 #define MAX_TEMP                        0x7fff  // max positive
 #define ADC_NUM_SAMPLES                 10  // 10 values saved; toss high and low to get average
 #define ADC_SHIFT_FOR_AVG               3
-int16_t     sampleHistory[ADC_NUM_SAMPLES]; // last N reads from ADC
-int16_t TemperatureSampleIndex = 0;
+int16_t     RTDsampleHistory[ADC_NUM_SAMPLES]; // last N reads from ADC
+int16_t     BatterysampleHistory[ADC_NUM_SAMPLES]; // last N reads from ADC
+int16_t SmoothSampleIndex = 0;
 
 pcnt_unit_handle_t PulseCounter_1 = NULL;
 pcnt_unit_handle_t PulseCounter_2 = NULL;
@@ -22,6 +23,7 @@ int Battery_V_Freq;
 float RtdVoltage;
 float Temperature;
 float BatteryVoltage;
+float bat_percent;
 PcntTableStruct const RtdTable_1K[] __attribute__((aligned(4))) =
 {
 	// 1K RTD -- based on datasheet
@@ -53,6 +55,8 @@ PcntTableStruct const RtdTable_1K[] __attribute__((aligned(4))) =
 	{ MAX_ADC12, MAX_TEMP },
 	// in reality, to get to MAX_ADC, would take about 10 billion degrees.
 };
+
+
 
 
 void pcnt_init(void) {
@@ -206,13 +210,14 @@ float convertRtdDataFromRawADCValue(const PcntTableStruct* adcTable, float RTD_V
 	return conversionValue;
 }
 
-void SmoothDataUsingOlympicVotingAverage(int RawValue)
+void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 {
-	sampleHistory[TemperatureSampleIndex] = (RawValue + sampleHistory[TemperatureSampleIndex])/2;
-	TemperatureSampleIndex++;
-	if (TemperatureSampleIndex > ADC_NUM_SAMPLES)
+	RTDsampleHistory[SmoothSampleIndex] = (RawValueRTD + RTDsampleHistory[SmoothSampleIndex]) / 2;
+	BatterysampleHistory[SmoothSampleIndex] = (RawValueBattery + BatterysampleHistory[SmoothSampleIndex]) / 2;
+	SmoothSampleIndex++;
+	if (SmoothSampleIndex > ADC_NUM_SAMPLES)
 	{
-		TemperatureSampleIndex = 0; 
+		SmoothSampleIndex = 0; 
 
 		// history buffer is full, so enough good adc values to proceed
 
@@ -228,7 +233,7 @@ void SmoothDataUsingOlympicVotingAverage(int RawValue)
 		sum = 0;
 		for (i = 0; i < ADC_NUM_SAMPLES; i++)
 		{
-			raw = sampleHistory[i];
+			raw = RTDsampleHistory[i];
 			sum += raw; // keep running total
 			if (raw < low) low = raw; // update the lowest reading
 			if (raw > high)high = raw; // update the highest reading
@@ -238,8 +243,27 @@ void SmoothDataUsingOlympicVotingAverage(int RawValue)
 		//next we will shift by n to effect a divide by 2^n to get the average of the 2^n remaining samples
 		RtdVoltage = (float)((float)(sum >> ADC_SHIFT_FOR_AVG) / 3200); //systemconfig.pcnt.rtd_scale;
 		pcnt_info.rtd_volt = RtdVoltage; //update global
+		//now process the Battery data
+
+		low = 0x7fffffff; // MAXINT
+		high = 0x80000000; // MININT
+		sum = 0;
+		for (i = 0; i < ADC_NUM_SAMPLES; i++)
+		{
+			raw = BatterysampleHistory[i];
+			sum += raw; // keep running total
+			if (raw < low) low = raw; // update the lowest reading
+			if (raw > high)high = raw; // update the highest reading
+		}
+		sum -= (low + high); // sum is now the total of the middle N values
+		//at this point we have the smoothed Raw battery number
+		//next we will shift by n to effect a divide by 2^n to get the average of the 2^n remaining samples
+		BatteryVoltage = (float)((float)(sum >> ADC_SHIFT_FOR_AVG) / 1600); //systemconfig.pcnt.rtd_scale;
+		pcnt_info.bat_volt = BatteryVoltage; //update global
+		
 	}
 }
+
 
 void Read_Counters() {
 	//reads both counter1 and 2, then resets counters to 0, used in 100hz loop
@@ -260,15 +284,28 @@ void Read_Counters() {
 	{Battery_V_Freq = pcnt_info.count02 - 1000; }
 	
 	//battery voltage next
-	BatteryVoltage = (float)((float)Battery_V_Freq / 337); //systemconfig.pcnt.battery_scale;
+	BatteryVoltage = (float)((float)Battery_V_Freq / 845); //systemconfig.pcnt.battery_scale;
 	pcnt_info.bat_volt = BatteryVoltage; //update global variable
-	
+	if (BatteryVoltage > 7.182){bat_percent = 100; }
+	else if(BatteryVoltage > 7.182f)	{bat_percent = 100; }
+	else if(BatteryVoltage > 6.591f)	{bat_percent = 90; }
+	else if(BatteryVoltage > 6.335f)	{bat_percent = 80; }
+	else if(BatteryVoltage > 6.25f)		{bat_percent = 70; }
+	else if(BatteryVoltage > 6.20f)		{bat_percent = 60; }
+	else if(BatteryVoltage > 6.15f)		{bat_percent = 50; }
+	else if(BatteryVoltage > 6.125f)	{bat_percent = 40; }
+	else if(BatteryVoltage > 6.1f)		{bat_percent = 30; }
+	else if(BatteryVoltage > 6.084f)	{bat_percent = 20; }
+	else if(BatteryVoltage > 5.493f)	{bat_percent = 10; }
+	else {bat_percent = 0; }
+
+	pcnt_info.bat_percent = bat_percent;//update global variable
 	//adjust the temperature next
 	if (pcnt_info.count01 < 1000)//adjust for 0 volt freq offset of 1000
 	{TemperatureFreq = 0; }
 	else
 	{TemperatureFreq = pcnt_info.count01 - 1000; }
-	SmoothDataUsingOlympicVotingAverage(TemperatureFreq);
+	SmoothDataUsingOlympicVotingAverage(TemperatureFreq, Battery_V_Freq);
 	// next we can apply the scaling logic to the net count
 	//the V/F internal reference is 2.5V so 2.5V should have 90% 
 	//or 900khz for the full scale frequency, that would correspond to a
@@ -280,5 +317,7 @@ void Read_Counters() {
 	//convert to temperature
 	Temperature = convertRtdDataFromRawADCValue(RtdTable_1K, (RtdVoltage*systemconfig.pcnt.rtd_scale)); //use lookup table to convert voltage to temperature
 	pcnt_info.temperature = Temperature;
+	
+	
 	
 }

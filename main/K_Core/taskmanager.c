@@ -135,12 +135,21 @@ void CheckBluetoothConnection(void)
 		//now we can build and send the status screen
 		//rptStr1[0] = 0; //set the pointer to null string
 		// strcat(rptStr1, ">RT:T66 "); //set up the first template for the report of the temperature
+		float bat_percent = (pcnt_info.bat_volt - PCNT_BATTERY_EMPTY) / (PCNT_BATTERY_FULL - PCNT_BATTERY_EMPTY) * 100;
+		if (bat_percent < 0) bat_percent = 0;
+
+		
 		sprintf(temp_string,
-			">RT:T66 %3.1f %d %1.2f %2.2f\n",
+			">RT:T66 %d %3.1f %d %1.2f %2.2f %.1f %d \n",
+			systemconfig.pcnt.programmed_temperature,
 			pcnt_info.temperature,
 			pcnt_info.duty,
 			pcnt_info.rtd_volt,
-			pcnt_info.bat_volt);
+			pcnt_info.bat_volt,
+			pcnt_info.bat_percent,
+			systemconfig.pcnt.enabled
+);
+		
 		/// strcat(rptStr1, tmpStr1);
 		communication_add_string_to_ble_buffer(&bleDevice.TxBuffer, temp_string);
 		//communication_add_string_to_serial_buffer(ComBuffer *targetBuffer, rptStr1);

@@ -285,7 +285,7 @@ void communication_process_rx_ble(BleDevice* device)
 			device->CommandLineIdx++;
 			AddCharacterToAsciiArgs(device, WorkRxChar); //plug in the gcode arg
 			if (idx >= 254)
-			{
+			{//karl lvana   check this and make is error, should never happen.
 				device->CommandLineBuffer[254] = CMD_END_CHAR;
 				parser_add_line_to_blebuffer(device);
 				device->UrgentFlag = 0; 
@@ -349,6 +349,14 @@ void communication_process_rx_ble(BleDevice* device)
 				device->UrgentFlag = 0; 
 				device->CommandLineIdx = 0;
 				return;
+				
+//			case CMD_END_CHAR:  //if (rawChar==10) 0xA or 0xD  can trigger the end of line
+//				//WorkingComPort->AcksWaiting++; //end offsetof line so we have something to process 
+//				//AddSerialCharToBuffer(&WorkingComPort->TxBuffer, (uint8_t) 0x06); //ackowlede receipt of the line
+//				AddCharacterToAsciiArgs(WorkingComPort, WorkRxChar); //
+//				//AddSerialCharToBuffer(TargetBuff, WorkRxChar);
+//				WorkingComPort->UrgentFlag = 0; return;
+				
 			case TOGGLE_DIAG_DISPLAY:   
 				if (run_mode == RUN_BLE_SERVER)
 				{

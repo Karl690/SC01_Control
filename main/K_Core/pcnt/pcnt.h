@@ -12,6 +12,7 @@
 
 #define PCNT_BATTERY_EMPTY 				6.0
 #define PCNT_BATTERY_FULL				9.0
+
  
 typedef struct 
 {
@@ -22,6 +23,7 @@ typedef struct
 	int duty; //in %
 	float rtd_volt; //in V
 	float bat_volt; //in V
+	float bat_percent;//battery percent
 } PCNT_INFO;
 
 typedef struct {
@@ -32,6 +34,7 @@ typedef struct {
 
 extern PCNT_INFO pcnt_info;
 extern int PwmTimerReloadRegister;
+extern float bat_percent;
 
 void pcnt_init(void);
 void EnableCounter();

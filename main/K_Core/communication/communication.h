@@ -1,7 +1,7 @@
 #pragma once
 #include "main.h"
 
-#define  PROCESS_MAX_CHARS_TO_READ_ON_ONE_SLICE 50
+#define  PROCESS_MAX_CHARS_TO_READ_ON_ONE_SLICE 20
 #define NULL_CHAR                  '\0'    // 0
 #define TERMINATE_WAIT_CHAR          1
 #define PAUSE_AT_END_OF_MOVE_CHAR    2

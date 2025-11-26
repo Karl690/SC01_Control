@@ -65,8 +65,8 @@ void ui_control_refresh() {
 	lv_label_set_text_fmt(ui_control.raw_cnt1, "%d", pcnt_info.count01);
 	lv_label_set_text_fmt(ui_control.raw_cnt2, "%d", pcnt_info.count02);
 
-	float bat_percent = (pcnt_info.bat_volt - PCNT_BATTERY_EMPTY) / (PCNT_BATTERY_FULL - PCNT_BATTERY_EMPTY) * 100;
-	if (bat_percent < 0) bat_percent = 0;
+//	float bat_percent = (pcnt_info.bat_volt - PCNT_BATTERY_EMPTY) / (PCNT_BATTERY_FULL - PCNT_BATTERY_EMPTY) * 100;
+//	if (bat_percent < 0) bat_percent = 0;
 	sprintf(ui_temp_string, "%.1f%c", bat_percent, '%');
 	lv_label_set_text(ui_control.battery, ui_temp_string);
 	int bat_level = 10 - ceil(bat_percent / 10);
