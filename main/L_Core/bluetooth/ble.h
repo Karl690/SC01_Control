@@ -127,7 +127,8 @@ extern uint16_t spp_client_mtu_size;
 extern uint8_t ble_scan_status; 
 extern esp_ble_gap_cb_param_t ble_client_scan_rst;
 
-
+extern char ble_last_data[256];
+extern uint8_t ble_last_direction;
 void ble_init();
 
 uint8_t ble_enable();

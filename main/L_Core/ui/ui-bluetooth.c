@@ -197,6 +197,7 @@ void ui_ble_scan_event_cb(lv_event_t* e)
 
 void ui_ble_timer_handler(lv_timer_t* timer)
 {
+	if (!lv_obj_is_visible(ui_ble_screen)) return;
 	if (ble_server_send_blink_count > 0)
 	{
 		lv_obj_set_style_text_color(ui_ble_server_sent_status, lv_color_hex(ble_server_send_blink_count % 2 ? UI_BUTTON_NORMAL_BG_COLOR : UI_BUTTON_NORMAL_FG_COLOR), LV_PART_MAIN);
@@ -213,6 +214,16 @@ void ui_ble_timer_handler(lv_timer_t* timer)
 	else
 	{
 		lv_obj_set_style_text_color(ui_ble_server_receive_status, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);
+	}
+
+	if (ble_last_direction == 0 && systemconfig.bluetooth.xmit_enabled) {
+		// xmit
+		lv_label_set_text(ui_ble_server_log_text, ble_last_data);
+		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(UI_SEND_COLOR), LV_PART_MAIN);
+	} else if (ble_last_direction == 1 && systemconfig.bluetooth.recv_enabled){
+		// recv
+		lv_label_set_text(ui_ble_server_log_text, ble_last_data);
+		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(UI_RECEIVE_COLOR), LV_PART_MAIN);
 	}
 }
 
@@ -514,14 +525,4 @@ void ui_ble_set_servername(char* name)
 
 void ui_ble_server_update_log(char* log, uint8_t size, uint8_t direction) {
 	strncpy(ui_temp_string, log, size);
-	if (direction == 0 && systemconfig.bluetooth.xmit_enabled) {
-		// xmit
-		lv_label_set_text(ui_ble_server_log_text, ui_temp_string);
-		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(0xfff700), LV_PART_MAIN);
-	} else if (direction == 1 && systemconfig.bluetooth.recv_enabled){
-		// recv
-		lv_label_set_text(ui_ble_server_log_text, ui_temp_string);
-		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(0xff00ff), LV_PART_MAIN);
-	}
-	
 }
