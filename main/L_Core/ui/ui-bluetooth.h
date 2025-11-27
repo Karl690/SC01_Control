@@ -2,9 +2,7 @@
 #include "ui.h"
 #include "../bluetooth/ble.h"
 extern lv_obj_t* ui_ble_screen;
-extern lv_obj_t* ui_ble_server_send_text;
-extern lv_obj_t* ui_ble_server_sent_total;
-extern lv_obj_t* ui_ble_server_receive_total;
+extern lv_obj_t* ui_ble_server_log_text;
 extern lv_obj_t* ui_ble_server_sent_status;
 extern lv_obj_t* ui_ble_server_receive_status;
 
@@ -18,3 +16,5 @@ void ui_ble_set_received_data(BleRemoteDevice* dev);
 void ui_ble_set_headindex(uint8_t index);
 void ui_ble_set_servername(char* name);
 void ui_ble_switch_screen(uint8_t screen);
+
+void ui_ble_server_update_log(char* log, uint8_t size, uint8_t direction);

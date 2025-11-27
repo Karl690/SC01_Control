@@ -477,9 +477,10 @@ uint8_t ble_server_send_data(uint8_t* data, uint16_t size)
 	if (!is_server_connected) return 0;
 	ble_server_send_blink_count = 5;	
 	ble_server_total_sent += size;
-	if (ui_simple_is_ble && ui_simple_is_xmt) {
-		ui_simple_add_log((char*) data, UI_SEND_COLOR);
-	}
+	// if (ui_simple_is_ble && ui_simple_is_xmt) {
+	// 	ui_simple_add_log((char*) data, UI_SEND_COLOR);
+	// }
+	ui_ble_server_update_log((char*)data, size, 0);
 	esp_err_t err = esp_ble_gatts_send_indicate(spp_gatts_if, spp_server_conn_id, spp_handle_table[SPP_IDX_SPP_DATA_NTY_VAL], size, data, false);	
 	if (err != ESP_OK) return 0;
 	return 1;
@@ -490,9 +491,10 @@ void ble_server_received_data(uint8_t* data, uint16_t size)
 	ble_server_receive_blink_count = 5;
 	ble_server_total_received += size;
 	communication_add_buffer_to_ble_buffer(&bleDevice.RxBuffer, data, size);	
-	if (ui_simple_is_ble && ui_simple_is_rcv) {
-		ui_simple_add_log((char*) data, UI_RECEIVE_COLOR);
-	}
+	ui_ble_server_update_log((char*)data, size, 1);
+	// if (ui_simple_is_ble && ui_simple_is_rcv) {
+	// 	ui_simple_add_log((char*) data, UI_RECEIVE_COLOR);
+	// }
 	
 }
 //////////////////////////////////////////////////////////////////////////////

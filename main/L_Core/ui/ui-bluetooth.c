@@ -19,9 +19,7 @@ lv_obj_t* ui_ble_server_button;
 lv_obj_t* ui_ble_client_button;
 lv_obj_t* ui_ble_server_panel;
 lv_obj_t* ui_ble_client_panel;
-lv_obj_t* ui_ble_server_send_text;
-lv_obj_t* ui_ble_server_sent_total;
-lv_obj_t* ui_ble_server_receive_total;
+lv_obj_t* ui_ble_server_log_text;
 lv_obj_t* ui_ble_server_sent_status;
 lv_obj_t* ui_ble_server_receive_status;
 lv_obj_t* ui_ble_server_name;
@@ -29,6 +27,9 @@ lv_obj_t* ui_ble_server_name;
 lv_obj_t* ui_ble_msg;
 lv_obj_t* ui_ble_address_spin;
 lv_obj_t* ui_ble_address_name;
+
+lv_obj_t* ui_ble_server_xmit_enabled;
+lv_obj_t* ui_ble_server_receive_enabled;
 
 BleRemoteDevice* selected_device = NULL;
 ble_server_status_t  prev_ble_server_status = BLE_SERVER_LISTENING;
@@ -52,14 +53,6 @@ void ui_ble_switch_screen(uint8_t screen)
 	}
 }
 
-void ui_ble_server_send_event_cb(lv_event_t* e) 
-{
-	char* text = (char*)lv_textarea_get_text(ui_ble_server_send_text);
-	uint8_t len = strlen(text);
-	if (len == 0) return;
-	ble_server_send_data((uint8_t*)text, len);
-}
-
 void ui_ble_show_setting_address()
 {
 	lv_obj_clear_flag(ui_ble_msg, LV_OBJ_FLAG_HIDDEN);
@@ -78,6 +71,29 @@ void ui_ble_setting_button_event_cb(lv_event_t* e)
 		lv_label_set_text(ui_ble_server_name, ble_get_name());
 	}
 	lv_obj_add_flag(ui_ble_msg, LV_OBJ_FLAG_HIDDEN);
+}
+
+void ui_ble_button_callback(lv_event_t* e) {
+	int code = (int)lv_event_get_user_data(e);
+	switch (code)
+	{
+	case 0:
+		systemconfig.bluetooth.xmit_enabled = !systemconfig.bluetooth.xmit_enabled;
+		ui_change_button_color(ui_ble_server_xmit_enabled, 
+			systemconfig.bluetooth.xmit_enabled == 0? 0x696969: 0x04fa05,
+			0x0
+		);
+		break;
+	case 1:
+		systemconfig.bluetooth.recv_enabled = !systemconfig.bluetooth.recv_enabled;
+		ui_change_button_color(ui_ble_server_receive_enabled, 
+			systemconfig.bluetooth.recv_enabled == 0? 0x696969: 0x04fa05,
+			0x0
+		);
+		break;
+	default:
+		break;
+	}
 }
 
 void ui_ble_spinbox_event_cb(lv_event_t* e)
@@ -183,8 +199,6 @@ void ui_ble_timer_handler(lv_timer_t* timer)
 {
 	if (ble_server_send_blink_count > 0)
 	{
-		sprintf(ui_temp_string, "%d", (int)ble_server_total_sent);
-		lv_label_set_text(ui_ble_server_sent_total, ui_temp_string);
 		lv_obj_set_style_text_color(ui_ble_server_sent_status, lv_color_hex(ble_server_send_blink_count % 2 ? UI_BUTTON_NORMAL_BG_COLOR : UI_BUTTON_NORMAL_FG_COLOR), LV_PART_MAIN);
 		ble_server_send_blink_count--;
 	}
@@ -193,8 +207,6 @@ void ui_ble_timer_handler(lv_timer_t* timer)
 	}
 	if (ble_server_receive_blink_count > 0)
 	{
-		sprintf(ui_temp_string, "%d", (int)ble_server_total_received);
-		lv_label_set_text(ui_ble_server_receive_total, ui_temp_string);
 		lv_obj_set_style_text_color(ui_ble_server_receive_status, lv_color_hex(ble_server_receive_blink_count % 2 ? UI_BUTTON_NORMAL_BG_COLOR : UI_BUTTON_NORMAL_FG_COLOR), LV_PART_MAIN);
 		ble_server_receive_blink_count--;
 	}
@@ -308,50 +320,47 @@ void ui_ble_screen_init()
 	obj = ui_create_button(ui_ble_server_panel, "REQUEST", button_large_width, button_h, 2, &lv_font_montserrat_14, ui_ble_server_updatename_event_cb, NULL);
 	lv_obj_set_pos(obj, x, y);
 	y += button_h + gap;
-	obj = ui_create_button(ui_ble_server_panel, "SEND", button_large_width, button_h, 2, &lv_font_montserrat_14, ui_ble_server_send_event_cb, NULL);	
-	lv_obj_set_pos(obj, SCREEN_WIDTH - button_large_width - gap, y);
-	y += button_h + gap;
 	obj = ui_create_button(ui_ble_server_panel, "ADDRESS", button_large_width, button_h, 2, &lv_font_montserrat_14, ui_ble_server_address_event_cb, NULL);	
 	lv_obj_set_pos(obj, SCREEN_WIDTH - button_large_width - gap, y);
 	
 	y = 5 + button_h + gap;
 	x = 10;
-	obj = lv_textarea_create(ui_ble_server_panel);
-	lv_obj_set_style_border_color(obj, lv_color_hex(UI_TEXTAREA_BORDER_COLOR), LV_PART_MAIN);
-	lv_obj_set_style_border_width(obj, 1, LV_PART_MAIN);
-	lv_textarea_set_one_line(obj, true);
-	lv_obj_set_size(obj, 250, button_h);
-	lv_obj_set_pos(obj, x, y);
-	lv_obj_add_event_cb(obj, ui_event_edit_cb, LV_EVENT_ALL, NULL);		
-	ui_ble_server_send_text = obj;
-	
-	
+	obj = ui_create_button(ui_ble_server_panel, "DICONNECT", 200, button_h, 3, &lv_font_montserrat_16, ui_ble_disconnect_event_cb, NULL);	
+	lv_obj_set_pos(obj, 5, y);
 	
 	y += button_h + gap;
-	obj = ui_create_label(ui_ble_server_panel, "XMIT: ", &lv_font_montserrat_20);
+	obj = ui_create_button(ui_ble_server_panel, "XMT", 55, 30, 3, &lv_font_montserrat_14, ui_ble_button_callback, (void*)0);
 	lv_obj_set_pos(obj, x, y);
+	ui_ble_server_xmit_enabled = obj;
+
 	obj = ui_create_label(ui_ble_server_panel, LV_SYMBOL_UP, &lv_font_montserrat_24);
 	lv_obj_set_style_text_color(obj, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);	
 	lv_obj_set_pos(obj, x+60, y);
 	ui_ble_server_sent_status = obj;
-	obj = ui_create_label(ui_ble_server_panel, "0", &lv_font_montserrat_20);
-	lv_obj_set_pos(obj, x + 90, y);
-	ui_ble_server_sent_total = obj;
 	
 	x = 200;
-	obj = ui_create_label(ui_ble_server_panel, "RCV: ", &lv_font_montserrat_20);
-	lv_obj_set_pos(obj, x, y);
 	obj = ui_create_label(ui_ble_server_panel, LV_SYMBOL_DOWN, &lv_font_montserrat_24);	
 	lv_obj_set_style_text_color(obj, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);
-	lv_obj_set_pos(obj, x + 60, y);
+	lv_obj_set_pos(obj, x, y);
 	ui_ble_server_receive_status = obj;
-	obj = ui_create_label(ui_ble_server_panel, "0", &lv_font_montserrat_20);
-	lv_obj_set_pos(obj, x + 90, y);
-	ui_ble_server_receive_total = obj;
+	obj = ui_create_button(ui_ble_server_panel, "RCV", 55, 30, 3, &lv_font_montserrat_14, ui_ble_button_callback, (void*)1);
+	lv_obj_set_pos(obj, x + 40, y);
+	ui_ble_server_receive_enabled = obj;
 	
+
 	y += button_h;
-	obj = ui_create_button(ui_ble_server_panel, "DICONNECT", 200, button_h, 3, &lv_font_montserrat_16, ui_ble_disconnect_event_cb, NULL);	
-	lv_obj_set_pos(obj, 5, y);
+	x = 5;
+	obj = lv_textarea_create(ui_ble_server_panel);
+	lv_obj_set_style_border_color(obj, lv_color_hex(UI_TEXTAREA_BORDER_COLOR), LV_PART_MAIN);
+	lv_obj_set_style_border_width(obj, 1, LV_PART_MAIN);
+	 lv_textarea_set_one_line(obj, true);
+	 lv_obj_set_size(obj, 460, button_h);
+	 lv_obj_set_pos(obj, x, y);
+	 /* Make the server text area read-only: remove edit callback and disable click/focus
+		 so the user can't edit it via touch/keyboard. */
+	 lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_CLICK_FOCUSABLE);
+	 ui_ble_server_log_text = obj;
+	
 	
 	// client 
 	x = 0; y = 0;
@@ -419,6 +428,15 @@ void ui_ble_screen_init()
 	lv_obj_set_pos(obj, 100, y); ui_ble_total_received = obj;
 	ui_ble_switch_screen(0);
 	
+	ui_change_button_color(ui_ble_server_xmit_enabled, 
+			systemconfig.bluetooth.xmit_enabled == 0? 0x696969: 0x04fa05,
+			0x0
+		);
+
+	ui_change_button_color(ui_ble_server_receive_enabled, 
+			systemconfig.bluetooth.recv_enabled == 0? 0x696969: 0x04fa05,
+			0x0
+		);
 	
 	ui_ble_create_window_set_address();
 	lv_timer_create(ui_ble_timer_handler, 100, NULL);
@@ -492,4 +510,18 @@ void ui_ble_set_received_data(BleRemoteDevice* dev)
 void ui_ble_set_servername(char* name)
 {
 	if (ui_ble_server_name)  lv_label_set_text(ui_ble_server_name, name); 
+}
+
+void ui_ble_server_update_log(char* log, uint8_t size, uint8_t direction) {
+	strncpy(ui_temp_string, log, size);
+	if (direction == 0 && systemconfig.bluetooth.xmit_enabled) {
+		// xmit
+		lv_label_set_text(ui_ble_server_log_text, ui_temp_string);
+		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(0xfff700), LV_PART_MAIN);
+	} else if (direction == 1 && systemconfig.bluetooth.recv_enabled){
+		// recv
+		lv_label_set_text(ui_ble_server_log_text, ui_temp_string);
+		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(0xff00ff), LV_PART_MAIN);
+	}
+	
 }

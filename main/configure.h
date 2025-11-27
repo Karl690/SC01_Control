@@ -33,6 +33,8 @@ typedef struct
 	uint8_t status; //1: connected, 0: disconnected	
 	uint8_t server_enabled;
 	uint8_t client_enabled;
+	uint8_t xmit_enabled;
+	uint8_t recv_enabled;
 } BLUETOOTH_CONFIG;
 typedef struct
 {
