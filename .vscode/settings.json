@@ -23,7 +23,11 @@
         "pcnt.h": "c",
         "iterator": "cpp",
         "cmdprocessor.h": "c",
-        "sequencer.h": "c"
+        "sequencer.h": "c",
+        "sd-card.h": "c",
+        "ui-settings.h": "c",
+        "revisionhistory.h": "c",
+        "display.h": "c"
     },
     "idf.espIdfPathWin": "C:\\Users\\falcon\\esp\\v5.4.3\\esp-idf",
     "idf.toolsPathWin": "C:\\Users\\falcon\\.espressif",

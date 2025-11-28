@@ -26,6 +26,7 @@ idf_component_register(
                     L_Core/ui/ui-wifi.c
                 	L_Core/ui/ui-comm.c
                     L_Core/ui/ui-plot.c
+					L_Core/ui/ui-variables.c
                 	L_Core/ui/images/btn_about.c
                 	L_Core/ui/images/copyright.c
                 	L_Core/ui/images/btnhome_01.c

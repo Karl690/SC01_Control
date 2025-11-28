@@ -1,4 +1,5 @@
 #pragma once
+#include "main.h"
 #include "lvgl.h"
 #include "font/font.h"
 
@@ -90,6 +91,7 @@ typedef enum
 	SCREEN_CONTROLS,
 	SCREEN_QUALITY,
 	SCREEN_SDCARD,
+	SCREEN_VARIALBES,
 	SCREEN_MEG,
 	SCREEN_SECS,
 	SCREEN_MEG_01,
@@ -184,5 +186,8 @@ void ui_textarea_set_readonly(lv_obj_t* obj, bool b);
 
 void ui_label_set_nmuber(lv_obj_t* obj, int number);
 int ui_label_get_nmuber(lv_obj_t* obj);
+lv_obj_t* ui_helpers_create_panel(lv_obj_t* parent, uint32_t color, bool scrollable);
+lv_obj_t* ui_helpers_create_label(lv_obj_t* parent, const char* text, const lv_font_t* font);
+
 void ui_call_button_event(uint8_t screen_id, uint8_t button_id, bool);
 void ui_send_button_event(uint8_t screen_id, uint8_t button_id, bool);

@@ -12,7 +12,7 @@
 
 #include "ui-splash.h"
 #include "ui-home.h"
-#include "ui-sdcard.h"
+// #include "ui-sdcard.h"
 #include "ui-settings.h"
 #include "ui-control.h"
 #include "ui-pct.h"
@@ -23,6 +23,7 @@
 #include "ui-simple.h"
 #include "ui-plot.h"
 #include "ui-wifi.h"
+#include "ui-variables.h"
 
 LV_IMG_DECLARE(img_hyrel3d_logo);
 
@@ -256,12 +257,13 @@ void ui_create_pct_title(lv_obj_t* parent, uint8_t screen)
 		break;
 	case SCREEN_SETTINGS:
 	case SCREEN_CONTROLS:
+	case SCREEN_VARIALBES:
 	case SCREEN_BLUETOOTH:
 		lv_obj_set_pos(logbutton, 380, 5);
 		break;
-	case SCREEN_SDCARD:
-		lv_obj_set_pos(logbutton, -2, 5);
-		break;
+	// case SCREEN_SDCARD:
+	// 	lv_obj_set_pos(logbutton, -2, 5);
+	// 	break;
 	default:
 		lv_obj_set_pos(logbutton, 1, 5);
 		obj = ui_create_button(parent, "CLR", button_large_width, button_h, 2, &lv_font_montserrat_16, ui_event_title_button_cb, (void*)UI_BTN_CLEAR);
@@ -299,6 +301,30 @@ int ui_label_get_nmuber(lv_obj_t* obj)
 	if (!obj) return 0;
 	int number = atoi(lv_label_get_text(obj));
 	return number;
+}
+
+lv_obj_t* ui_helpers_create_panel(lv_obj_t* parent, uint32_t color, bool scrollable)
+{
+	lv_obj_t* panel = lv_obj_create(parent);
+	lv_obj_set_style_pad_all(panel, 0, LV_PART_MAIN);
+	lv_obj_set_style_border_width(panel, 0, LV_PART_MAIN);
+	if (!scrollable)
+	{
+		lv_obj_clear_flag(panel, LV_OBJ_FLAG_SCROLLABLE);
+	}
+	lv_obj_set_style_bg_color(panel, lv_color_hex(color), LV_PART_MAIN);
+	return panel;
+}
+
+lv_obj_t* ui_helpers_create_label(lv_obj_t* parent, const char* text, const lv_font_t* font)
+{
+	lv_obj_t* obj = lv_label_create(parent);
+	lv_obj_set_style_text_color(obj, lv_color_hex(0xffffff), LV_PART_MAIN);
+	lv_obj_set_width(obj, LV_SIZE_CONTENT); /// 1
+	lv_obj_set_height(obj, LV_SIZE_CONTENT); /// 1
+	lv_label_set_text(obj, text);	
+	lv_obj_set_style_text_font(obj, font, LV_PART_MAIN);
+	return obj;
 }
 
 void messagebox_delay_timer(lv_timer_t * timer)
@@ -360,8 +386,11 @@ void ui_transform_screen(uint8_t screen)
 	case SCREEN_SIMPLE:
 		active_screen = ui_simple_screen;
 		break;
-	case SCREEN_SDCARD:
-		active_screen = ui_sdcard_screen;
+	// case SCREEN_SDCARD:
+	// 	active_screen = ui_sdcard_screen;
+	// 	break;
+	case SCREEN_VARIALBES:
+		active_screen = ui_variable_screen;
 		break;
 	case SCREEN_CONTROLS:
 		active_screen = ui_control_screen;
@@ -504,7 +533,9 @@ void ui_update_timer(lv_timer_t * timer)
 	case SCREEN_CONTROLS:
 		ui_control_refresh();
 		break;
-	
+	case SCREEN_VARIALBES:
+		ui_variables_refresh();
+		break;
 	default:
 		break;
 	}
@@ -516,7 +547,7 @@ void InitUI( void )
     lv_disp_set_theme(dispp, theme);
 	ui_splash_screen_init();
 	ui_home_screen_init();
-	ui_sdcard_screen_init();
+	// ui_sdcard_screen_init();
 	ui_settings_screen_init();
 	ui_control_screen_init();
 	ui_pct_screen_init();
@@ -527,6 +558,7 @@ void InitUI( void )
 	ui_secs_screen_init();
 	ui_simple_screen_init();
 	ui_wifi_screen_init();
+	ui_variables_screen_init();
 
 	keyboard = lv_keyboard_create(ui_home_screen);
 	lv_obj_add_flag(keyboard, LV_OBJ_FLAG_HIDDEN);

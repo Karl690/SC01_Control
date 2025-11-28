@@ -41,8 +41,6 @@ int extract_index_with_regex(const char *filename) {
 	if (ret != 0 || matches[1].rm_so == -1) {
 		return -1;
 	}
-
-	// ??? ?? ?? ??
 	char num_str[32];
 	int len = matches[1].rm_eo - matches[1].rm_so;
 	strncpy(num_str, filename + matches[1].rm_so, len);

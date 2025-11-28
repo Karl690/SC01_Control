@@ -62,8 +62,14 @@ typedef struct {
 
 #define NUMBER_OF_DISPLAY_LISTS 4
 
+extern int DisplayIndex;
+
 extern DisplayVariableInfo LcdVarsTable[];
 extern DisplayVariableInfo Lcd1VarsTable[];
 extern DisplayVariableInfo Lcd2VarsTable[];
 extern DisplayVariableInfo Lcd3VarsTable[];
+
+void ShowNextDisplay();
+void ShowPreviousDisplay();
+DisplayVariableInfo* GetActiveDisplay();
 

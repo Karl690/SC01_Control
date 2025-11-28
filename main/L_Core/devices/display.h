@@ -88,3 +88,4 @@ bool display_dump_buffer();
 void display_reset_capture_buffer();
 
 void display_rotate(int direction);
+
