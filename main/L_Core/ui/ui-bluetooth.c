@@ -218,11 +218,11 @@ void ui_ble_timer_handler(lv_timer_t* timer)
 
 	if (ble_last_direction == 0 && systemconfig.bluetooth.xmit_enabled) {
 		// xmit
-		lv_label_set_text(ui_ble_server_log_text, ble_last_data);
+		lv_textarea_set_text(ui_ble_server_log_text, ble_last_data);
 		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(UI_SEND_COLOR), LV_PART_MAIN);
 	} else if (ble_last_direction == 1 && systemconfig.bluetooth.recv_enabled){
 		// recv
-		lv_label_set_text(ui_ble_server_log_text, ble_last_data);
+		lv_textarea_set_text(ui_ble_server_log_text, ble_last_data);
 		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(UI_RECEIVE_COLOR), LV_PART_MAIN);
 	}
 }
@@ -450,7 +450,7 @@ void ui_ble_screen_init()
 		);
 	
 	ui_ble_create_window_set_address();
-	lv_timer_create(ui_ble_timer_handler, 100, NULL);
+	lv_timer_create(ui_ble_timer_handler, 500, NULL);
 }
 
 void ui_ble_changed_ble_status(uint8_t status)
@@ -521,8 +521,4 @@ void ui_ble_set_received_data(BleRemoteDevice* dev)
 void ui_ble_set_servername(char* name)
 {
 	if (ui_ble_server_name)  lv_label_set_text(ui_ble_server_name, name); 
-}
-
-void ui_ble_server_update_log(char* log, uint8_t size, uint8_t direction) {
-	strncpy(ui_temp_string, log, size);
 }
