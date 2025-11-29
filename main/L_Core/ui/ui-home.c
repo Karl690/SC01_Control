@@ -78,7 +78,7 @@ void ui_home_screen_init(void)
 	
 	x += BUTTON_WIDTH + gap_x;
 	obj = ui_home_create_button(ui_home_screen, &img_btnhome_02, &img_folder, "VARIALBES");
-	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)SCREEN_VARIALBES);
+	lv_obj_add_event_cb(obj, ui_home_event_tranform_screen_cb, LV_EVENT_CLICKED, (void*)SCREEN_VARIABLES);
 	lv_obj_set_pos(obj, x, y);
 
 	x += BUTTON_WIDTH + gap_x;

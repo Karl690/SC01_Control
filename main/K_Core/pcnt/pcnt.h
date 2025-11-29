@@ -13,6 +13,8 @@
 #define PCNT_BATTERY_EMPTY 				6.0
 #define PCNT_BATTERY_FULL				9.0
 
+#define ADC_NUM_SAMPLES                 10  // 10 values saved; toss high and low to get average
+#define ADC_SHIFT_FOR_AVG               3
  
 typedef struct 
 {
@@ -35,7 +37,8 @@ typedef struct {
 extern PCNT_INFO pcnt_info;
 extern int PwmTimerReloadRegister;
 extern float bat_percent;
-
+extern int16_t     RTDsampleHistory[ADC_NUM_SAMPLES]; // last N reads from ADC
+extern int16_t     BatterysampleHistory[ADC_NUM_SAMPLES]; // last N reads from ADC
 void pcnt_init(void);
 void EnableCounter();
 void DisableCounter();

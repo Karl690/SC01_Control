@@ -9,8 +9,8 @@ PCNT_INFO pcnt_info = { 0, 0, 0, 0, 0, 0 };
 #define TEMP_SCALE                      32
 #define TEMP_SCALEF                     32.0f
 #define MAX_TEMP                        0x7fff  // max positive
-#define ADC_NUM_SAMPLES                 10  // 10 values saved; toss high and low to get average
-#define ADC_SHIFT_FOR_AVG               3
+//#define ADC_NUM_SAMPLES                 10  // 10 values saved; toss high and low to get average
+//#define ADC_SHIFT_FOR_AVG               3
 int16_t     RTDsampleHistory[ADC_NUM_SAMPLES]; // last N reads from ADC
 int16_t     BatterysampleHistory[ADC_NUM_SAMPLES]; // last N reads from ADC
 int16_t SmoothSampleIndex = 0;

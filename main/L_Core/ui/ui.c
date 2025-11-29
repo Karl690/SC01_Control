@@ -257,7 +257,7 @@ void ui_create_pct_title(lv_obj_t* parent, uint8_t screen)
 		break;
 	case SCREEN_SETTINGS:
 	case SCREEN_CONTROLS:
-	case SCREEN_VARIALBES:
+	case SCREEN_VARIABLES:
 	case SCREEN_BLUETOOTH:
 		lv_obj_set_pos(logbutton, 380, 5);
 		break;
@@ -389,7 +389,7 @@ void ui_transform_screen(uint8_t screen)
 	// case SCREEN_SDCARD:
 	// 	active_screen = ui_sdcard_screen;
 	// 	break;
-	case SCREEN_VARIALBES:
+	case SCREEN_VARIABLES:
 		active_screen = ui_variable_screen;
 		break;
 	case SCREEN_CONTROLS:
@@ -527,13 +527,13 @@ void ui_update_timer(lv_timer_t * timer)
 
 	switch (ui_current_screen)
 	{
-	case SCREEN_MEG:
-		ui_pct_refresh();
-		break;
+//	case SCREEN_MEG:
+//		ui_pct_refresh();
+//		break;
 	case SCREEN_CONTROLS:
 		ui_control_refresh();
 		break;
-	case SCREEN_VARIALBES:
+	case SCREEN_VARIABLES:
 		ui_variables_refresh();
 		break;
 	default:

@@ -5,24 +5,39 @@
 #include "L_Core/ui/ui-opc.h"
 #include "K_Core/adc/adc.h"
 #include "RevisionHistory.h"
+#include "K_Core/pcnt/pcnt.h"
 
 int DisplayIndex = 0;
 
 DisplayVariableInfo LcdVarsTable[] = {
-	{ &HeartBeat, "HB", FUNC_INT32, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
-	{ &ADC_Channel[0].convAvg, "ADC CH0", FUNC_FLOAT, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
-	{ &ADC_Channel[0].adcAvg, "ADC CH0-Raw", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
-	{ &ADC_Channel[1].convAvg, "ADC CH1", FUNC_FLOAT, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
-	{ &ADC_Channel[1].adcAvg, "ADC CH1-Raw", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
-	{ &ADC_Channel[2].convAvg, "ADC CH2", FUNC_FLOAT, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
-	{ &ADC_Channel[2].adcAvg, "ADC CH2-Raw", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &HeartBeat, "HB  =",			FUNC_INT32, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &RTDsampleHistory[0], "RTD0= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL},
+	{ &RTDsampleHistory[1], "RTD1= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &RTDsampleHistory[2], "RTD2= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &RTDsampleHistory[3], "RTD3= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &RTDsampleHistory[4], "RTD4= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &RTDsampleHistory[5], "RTD5= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &RTDsampleHistory[6], "RTD6= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &RTDsampleHistory[7], "RTD7= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &RTDsampleHistory[8], "RTD8= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &RTDsampleHistory[9], "RTD9= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
 	{0},
 };
 
 
 DisplayVariableInfo Lcd1VarsTable[] = {
-	{ &HeartBeat, "HB", FUNC_INT32, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
-	{0},
+	{ &HeartBeat, "HB  =", FUNC_INT32, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &BatterysampleHistory[0], "BAT0= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &BatterysampleHistory[1], "BAT1= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &BatterysampleHistory[2], "BAT2= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &BatterysampleHistory[3], "BAT3= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &BatterysampleHistory[4], "BAT4= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &BatterysampleHistory[5], "BAT5= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &BatterysampleHistory[6], "BAT6= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &BatterysampleHistory[7], "BAT7= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &BatterysampleHistory[8], "BAT8= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &BatterysampleHistory[9], "BAT9= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ 0 },
 };
 
 DisplayVariableInfo Lcd2VarsTable[] = {
