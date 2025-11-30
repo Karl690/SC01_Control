@@ -331,17 +331,19 @@ void ui_ble_screen_init()
 //	lv_obj_set_pos(obj, 230, 5);
 	
 	int x = 20, y = 70;
-	int button_large_width = 100;
+	int button_large_width = 90;
 	int button_h = 45;
 	int gap = 5;
 	
 	y = 5;
-	obj = ui_create_button(ui_ble_screen, "  BLE\nSERVER", 100, button_h, 3, &lv_font_montserrat_14, ui_ble_switch_event_cb, (void*)0);	
+	//server button
+	obj = ui_create_button(ui_ble_screen, "  BLE\nSERVER", 90, button_h, 3, &lv_font_montserrat_14, ui_ble_switch_event_cb, (void*)0);	
 	lv_obj_set_pos(obj, 105, y);
 	ui_ble_server_button = obj;
 	ui_change_button_color(obj, UI_MENU_ACTIVE_ITEM_COLOR, UI_BUTTON_NORMAL_FG_COLOR);
-	obj = ui_create_button(ui_ble_screen, "  BLE\nCLIENT", 100, button_h, 3, &lv_font_montserrat_14, ui_ble_switch_event_cb, (void*)1);	
-	lv_obj_set_pos(obj, 375, y);
+	//client button
+	obj = ui_create_button(ui_ble_screen, "  BLE\nCLIENT", 90, button_h, 3, &lv_font_montserrat_14, ui_ble_switch_event_cb, (void*)1);	
+	lv_obj_set_pos(obj, 385, y);
 	ui_ble_client_button = obj;
 	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_NORMAL_FG_COLOR);
 	// panel
@@ -375,16 +377,18 @@ void ui_ble_screen_init()
 	
 	y = 5 + button_h + gap;
 	x = 2;
-	obj = ui_create_button(ui_ble_server_panel, "DICONNECT", button_large_width, button_h, 3, &lv_font_montserrat_14, ui_ble_disconnect_event_cb, NULL);	
+	obj = ui_create_button(ui_ble_server_panel, "UN-PAIR", button_large_width, button_h, 3, &lv_font_montserrat_14, ui_ble_disconnect_event_cb, NULL);	
 	lv_obj_set_pos(obj, SCREEN_WIDTH - button_large_width - gap, y+45);
 	
-	int button_w = 60;
+	int button_w = 55;
 	button_h = 45;
 	gap = 5;
 	//next is the clear button
 	obj = ui_create_button(ui_ble_server_panel, "CLR", button_w, button_h, 2, &lv_font_montserrat_16, ui_ble_button_callback, (void*)UI_SIMPLE_BTN_CLEAR);
 	//ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
-	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_NORMAL_FG_COLOR);
+	ui_change_button_color(obj, UI_CHECK_NONACTIVE_COLOR, UI_BUTTON_NORMAL_FG_COLOR);
+	//UI_CHECK_NONACTIVE_COLOR)
+
 	lv_obj_set_pos(obj, x, 5);
 	btn_clear = obj;
 	
@@ -433,7 +437,7 @@ void ui_ble_screen_init()
 	btn_hex_display = obj;
 //
 	obj = lv_obj_create(ui_ble_server_panel);
-	lv_obj_set_size(obj, 300, SCREEN_HEIGHT - 70);
+	lv_obj_set_size(obj, 320, SCREEN_HEIGHT - 70);
 	lv_obj_set_pos(obj, button_w + gap * 2, 0); 
 	lv_obj_set_style_pad_all(obj, 0, LV_PART_MAIN);
 	//lv_obj_set_style_bg_color(obj, lv_color_hex(UI_PANEL_BACGROUND_COLOR), LV_PART_MAIN);
