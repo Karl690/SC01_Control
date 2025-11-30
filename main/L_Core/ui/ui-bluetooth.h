@@ -16,3 +16,8 @@ void ui_ble_set_received_data(BleRemoteDevice* dev);
 void ui_ble_set_headindex(uint8_t index);
 void ui_ble_set_servername(char* name);
 void ui_ble_switch_screen(uint8_t screen);
+void ClearLog(void);
+void add_line(const char* log, uint32_t color, bool isHex);
+void add_char(const char code, uint32_t color);
+void add_log(char* log, uint32_t color);
+

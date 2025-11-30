@@ -3,6 +3,7 @@
 #include "L_Core/bluetooth/ble.h"
 #include "L_Core/storage/nvs.h"
 #include "ui-bluetooth.h"
+#include "L_Core/ui/ui-simple.h"
 
 lv_obj_t* ui_ble_screen;
 lv_obj_t* ui_ble_btn_scan;
@@ -30,11 +31,29 @@ lv_obj_t* ui_ble_address_name;
 
 lv_obj_t* ui_ble_server_xmit_enabled;
 lv_obj_t* ui_ble_server_receive_enabled;
+lv_obj_t* lbl_tx_indicator;
+lv_obj_t* lbl_tx_num;
+lv_obj_t* btn_show_tx;
+lv_obj_t* btn_show_rx;
+lv_obj_t* btn_clear;
+lv_obj_t* lbl_rx_indicator;
+lv_obj_t* lbl_rx_num;
+lv_obj_t* btn_hex_display;
+lv_obj_t* log_panel;
+uint32_t log_head = 0;
+uint32_t log_tail = 0;
+char temp_string1[1024] = { 0 };
+char temp_string2[256] = { 0 };
 
 BleRemoteDevice* selected_device = NULL;
 ble_server_status_t  prev_ble_server_status = BLE_SERVER_LISTENING;
 // screen: 0: server screen
 //			1: client screen
+
+bool Show_rcv = false;
+bool Show_xmt = false;
+bool Hex_Format = false;
+
 void ui_ble_switch_screen(uint8_t screen)
 {
 	if (screen == 0)
@@ -77,24 +96,38 @@ void ui_ble_button_callback(lv_event_t* e) {
 	int code = (int)lv_event_get_user_data(e);
 	switch (code)
 	{
-	case 0:
+	case UI_SIMPLE_BTN_XMIT:
 		systemconfig.bluetooth.xmit_enabled = !systemconfig.bluetooth.xmit_enabled;
-		ui_change_button_color(ui_ble_server_xmit_enabled, 
+		Show_xmt = systemconfig.bluetooth.xmit_enabled;
+		ui_change_button_color(btn_show_tx, 
 			systemconfig.bluetooth.xmit_enabled == 0? 0x696969: 0x04fa05,
 			0x0
 		);
 		break;
-	case 1:
+	case UI_SIMPLE_BTN_RCV:
 		systemconfig.bluetooth.recv_enabled = !systemconfig.bluetooth.recv_enabled;
-		ui_change_button_color(ui_ble_server_receive_enabled, 
+		Show_rcv = systemconfig.bluetooth.recv_enabled;
+		ui_change_button_color(btn_show_rx, 
 			systemconfig.bluetooth.recv_enabled == 0? 0x696969: 0x04fa05,
 			0x0
 		);
+		break;
+	case UI_SIMPLE_BTN_HEX:
+		//lv_obj_add_flag(ui_simple_func_menu, LV_OBJ_FLAG_HIDDEN);
+		Hex_Format = !Hex_Format;
+		ui_change_button_color(btn_hex_display, 
+			Hex_Format ? 0x696969: 0x04fa05,
+			0x0
+			);
+		break;
+	case UI_SIMPLE_BTN_CLEAR:
+		ClearLog();
 		break;
 	default:
 		break;
 	}
 }
+
 
 void ui_ble_spinbox_event_cb(lv_event_t* e)
 {
@@ -200,30 +233,33 @@ void ui_ble_timer_handler(lv_timer_t* timer)
 	if (!lv_obj_is_visible(ui_ble_screen)) return;
 	if (ble_server_send_blink_count > 0)
 	{
-		lv_obj_set_style_text_color(ui_ble_server_sent_status, lv_color_hex(ble_server_send_blink_count % 2 ? UI_BUTTON_NORMAL_BG_COLOR : UI_BUTTON_NORMAL_FG_COLOR), LV_PART_MAIN);
+		lv_obj_set_style_text_color(lbl_tx_indicator, lv_color_hex(ble_server_send_blink_count % 2 ? UI_BUTTON_NORMAL_BG_COLOR : UI_BUTTON_NORMAL_FG_COLOR), LV_PART_MAIN);
 		ble_server_send_blink_count--;
 	}
 	else {
-		lv_obj_set_style_text_color(ui_ble_server_sent_status, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);
+		lv_obj_set_style_text_color(lbl_tx_indicator, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);
 	}
 	if (ble_server_receive_blink_count > 0)
 	{
-		lv_obj_set_style_text_color(ui_ble_server_receive_status, lv_color_hex(ble_server_receive_blink_count % 2 ? UI_BUTTON_NORMAL_BG_COLOR : UI_BUTTON_NORMAL_FG_COLOR), LV_PART_MAIN);
+		lv_obj_set_style_text_color(lbl_rx_indicator, lv_color_hex(ble_server_receive_blink_count % 2 ? UI_BUTTON_NORMAL_BG_COLOR : UI_BUTTON_NORMAL_FG_COLOR), LV_PART_MAIN);
 		ble_server_receive_blink_count--;
 	}
 	else
 	{
-		lv_obj_set_style_text_color(ui_ble_server_receive_status, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);
+		lv_obj_set_style_text_color(lbl_rx_indicator, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);
 	}
 
-	if (ble_last_direction == 0 && systemconfig.bluetooth.xmit_enabled) {
-		// xmit
-		lv_textarea_set_text(ui_ble_server_log_text, ble_last_data);
-		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(UI_SEND_COLOR), LV_PART_MAIN);
-	} else if (ble_last_direction == 1 && systemconfig.bluetooth.recv_enabled){
+	if (ble_last_direction == 0 && systemconfig.bluetooth.xmit_enabled) 
+	{
+		// xmit karlchris   this is where we will plug in the display data
+		add_log(ble_last_data, UI_SEND_COLOR);
+//		lv_textarea_set_text(ui_ble_server_log_text, ble_last_data);
+//		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(UI_SEND_COLOR), LV_PART_MAIN);
+	} else 
+	if (ble_last_direction == 1 && systemconfig.bluetooth.recv_enabled)
+	{
 		// recv
-		lv_textarea_set_text(ui_ble_server_log_text, ble_last_data);
-		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(UI_RECEIVE_COLOR), LV_PART_MAIN);
+		add_log(ble_last_data, UI_RECEIVE_COLOR);
 	}
 }
 
@@ -291,21 +327,21 @@ void ui_ble_screen_init()
 	ui_ble_screen = ui_create_screen();	
 	ui_create_pct_title(ui_ble_screen, SCREEN_BLUETOOTH);
 	
-	obj = ui_create_label(ui_ble_screen, (char*)"BLUETOOTH", &mono_bold_28);	
-	lv_obj_set_pos(obj, 250, 7);
+//	obj = ui_create_label(ui_ble_screen, (char*)"BLE", &lv_font_montserrat_14);	
+//	lv_obj_set_pos(obj, 230, 5);
 	
 	int x = 20, y = 70;
 	int button_large_width = 100;
 	int button_h = 45;
 	int gap = 5;
 	
-	y = 60;
-	obj = ui_create_button(ui_ble_screen, "SERVER", SCREEN_WIDTH / 2 - 1, button_h, 3, &lv_font_montserrat_14, ui_ble_switch_event_cb, (void*)0);	
-	lv_obj_set_pos(obj, 0, y);
+	y = 5;
+	obj = ui_create_button(ui_ble_screen, "  BLE\nSERVER", 100, button_h, 3, &lv_font_montserrat_14, ui_ble_switch_event_cb, (void*)0);	
+	lv_obj_set_pos(obj, 105, y);
 	ui_ble_server_button = obj;
 	ui_change_button_color(obj, UI_MENU_ACTIVE_ITEM_COLOR, UI_BUTTON_NORMAL_FG_COLOR);
-	obj = ui_create_button(ui_ble_screen, "CLIENT", SCREEN_WIDTH / 2 - 1, button_h, 3, &lv_font_montserrat_14, ui_ble_switch_event_cb, (void*)1);	
-	lv_obj_set_pos(obj, SCREEN_WIDTH/2, y);
+	obj = ui_create_button(ui_ble_screen, "  BLE\nCLIENT", 100, button_h, 3, &lv_font_montserrat_14, ui_ble_switch_event_cb, (void*)1);	
+	lv_obj_set_pos(obj, 375, y);
 	ui_ble_client_button = obj;
 	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_NORMAL_FG_COLOR);
 	// panel
@@ -322,10 +358,13 @@ void ui_ble_screen_init()
 	lv_obj_set_style_pad_all(obj, 0, LV_PART_MAIN);
 	ui_ble_client_panel = obj;
 	
+	obj = ui_create_label(ui_ble_screen, ble_get_name(), &lv_font_montserrat_16);
+	lv_obj_set_pos(obj, 210, 35); 
+	ui_ble_server_name = obj;
+	
 	// server
 	x = 10; y = 5;
-	obj = ui_create_label(ui_ble_server_panel, ble_get_name(), &lv_font_montserrat_30);
-	lv_obj_set_pos(obj, x, y); ui_ble_server_name = obj;
+
 	
 	x = SCREEN_WIDTH - button_large_width - gap; y = 5;
 	obj = ui_create_button(ui_ble_server_panel, "REQUEST", button_large_width, button_h, 2, &lv_font_montserrat_14, ui_ble_server_updatename_event_cb, NULL);
@@ -335,42 +374,94 @@ void ui_ble_screen_init()
 	lv_obj_set_pos(obj, SCREEN_WIDTH - button_large_width - gap, y);
 	
 	y = 5 + button_h + gap;
-	x = 10;
-	obj = ui_create_button(ui_ble_server_panel, "DICONNECT", 200, button_h, 3, &lv_font_montserrat_16, ui_ble_disconnect_event_cb, NULL);	
-	lv_obj_set_pos(obj, 5, y);
+	x = 2;
+	obj = ui_create_button(ui_ble_server_panel, "DICONNECT", button_large_width, button_h, 3, &lv_font_montserrat_14, ui_ble_disconnect_event_cb, NULL);	
+	lv_obj_set_pos(obj, SCREEN_WIDTH - button_large_width - gap, y+45);
+	
+	int button_w = 60;
+	button_h = 45;
+	gap = 5;
+	//next is the clear button
+	obj = ui_create_button(ui_ble_server_panel, "CLR", button_w, button_h, 2, &lv_font_montserrat_16, ui_ble_button_callback, (void*)UI_SIMPLE_BTN_CLEAR);
+	//ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
+	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_NORMAL_FG_COLOR);
+	lv_obj_set_pos(obj, x, 5);
+	btn_clear = obj;
+	
+	const lv_font_t* font = &lv_font_montserrat_16;
+	obj = ui_create_label(ui_ble_server_panel, LV_SYMBOL_UP, &lv_font_montserrat_20);
+	lv_obj_set_style_text_color(obj, lv_color_hex(UI_BUTTON_DISABLE_FG_COLOR), LV_PART_MAIN);	
+	lv_obj_set_pos(obj, x, y);
+	lbl_tx_indicator = obj;
+	
+	obj = ui_create_label(ui_ble_server_panel, "0", &lv_font_montserrat_14);
+	lv_obj_set_pos(obj, x + 10, y + 5);
+	lv_obj_set_width(obj, 50);
+	lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_RIGHT, 0);	
+	lbl_tx_num = obj;
+	y += 25;
+
+	
+	obj = ui_create_button(ui_ble_server_panel, "XMT", button_w, button_h, 2, font, ui_ble_button_callback, (void*)UI_SIMPLE_BTN_XMIT);
+	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
+	lv_obj_set_pos(obj, x, y);
+	btn_show_tx = obj;
 	
 	y += button_h + gap;
-	obj = ui_create_button(ui_ble_server_panel, "XMT", 55, 30, 3, &lv_font_montserrat_14, ui_ble_button_callback, (void*)0);
+	obj = ui_create_button(ui_ble_server_panel, "RCV", button_w, button_h, 2, font, ui_ble_button_callback, (void*)UI_SIMPLE_BTN_RCV);
+	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
 	lv_obj_set_pos(obj, x, y);
-	ui_ble_server_xmit_enabled = obj;
-
-	obj = ui_create_label(ui_ble_server_panel, LV_SYMBOL_UP, &lv_font_montserrat_24);
-	lv_obj_set_style_text_color(obj, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);	
-	lv_obj_set_pos(obj, x+60, y);
-	ui_ble_server_sent_status = obj;
+	btn_show_rx = obj;
 	
-	x = 200;
-	obj = ui_create_label(ui_ble_server_panel, LV_SYMBOL_DOWN, &lv_font_montserrat_24);	
-	lv_obj_set_style_text_color(obj, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);
+	y += button_h + gap;
+	obj = ui_create_label(ui_ble_server_panel, LV_SYMBOL_DOWN, &lv_font_montserrat_20);
+	lv_obj_set_style_text_color(obj, lv_color_hex(UI_BUTTON_DISABLE_FG_COLOR), LV_PART_MAIN);
 	lv_obj_set_pos(obj, x, y);
-	ui_ble_server_receive_status = obj;
-	obj = ui_create_button(ui_ble_server_panel, "RCV", 55, 30, 3, &lv_font_montserrat_14, ui_ble_button_callback, (void*)1);
-	lv_obj_set_pos(obj, x + 40, y);
-	ui_ble_server_receive_enabled = obj;
+	lbl_rx_indicator = obj;
 	
-
-	y += button_h;
-	x = 5;
-	obj = lv_textarea_create(ui_ble_server_panel);
-	lv_obj_set_style_border_color(obj, lv_color_hex(UI_TEXTAREA_BORDER_COLOR), LV_PART_MAIN);
-	lv_obj_set_style_border_width(obj, 1, LV_PART_MAIN);
-	 lv_textarea_set_one_line(obj, true);
-	 lv_obj_set_size(obj, 460, button_h);
-	 lv_obj_set_pos(obj, x, y);
-	 /* Make the server text area read-only: remove edit callback and disable click/focus
-		 so the user can't edit it via touch/keyboard. */
-	 lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_CLICK_FOCUSABLE);
-	 ui_ble_server_log_text = obj;
+	obj = ui_create_label(ui_ble_server_panel, "0", &lv_font_montserrat_12);
+	lv_obj_set_pos(obj, x + 10, y);
+	lv_obj_set_width(obj, 50);
+	lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_RIGHT, 0);
+	lbl_rx_num = obj;
+	
+	y += 25;
+	obj = ui_create_button(ui_ble_server_panel, "HEX", button_w, button_h, 2, font, ui_ble_button_callback, (void*)UI_SIMPLE_BTN_HEX);
+	//ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
+	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_NORMAL_FG_COLOR);
+	lv_obj_set_pos(obj, x, y);
+	btn_hex_display = obj;
+//
+	obj = lv_obj_create(ui_ble_server_panel);
+	lv_obj_set_size(obj, 300, SCREEN_HEIGHT - 70);
+	lv_obj_set_pos(obj, button_w + gap * 2, 0); 
+	lv_obj_set_style_pad_all(obj, 0, LV_PART_MAIN);
+	//lv_obj_set_style_bg_color(obj, lv_color_hex(UI_PANEL_BACGROUND_COLOR), LV_PART_MAIN);
+	log_panel = obj;
+	
+	for (uint8_t i = 0; i < UI_LOG_MAX_LINE; i++)
+	{
+		obj = lv_label_create(log_panel);
+		lv_label_set_long_mode(obj, LV_LABEL_LONG_WRAP); /*Automatically break long lines*/
+		lv_obj_set_style_border_color(obj, lv_color_hex(0x550055), LV_PART_MAIN);
+		lv_obj_set_style_text_font(obj, &mono_regualr_16, LV_PART_MAIN);
+		lv_obj_set_width(obj, lv_pct(95)); 
+		lv_obj_set_x(obj, 5); 
+		lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
+	}
+	
+//	y += button_h;
+//	x = 5;
+//	obj = lv_textarea_create(ui_ble_server_panel);
+//	lv_obj_set_style_border_color(obj, lv_color_hex(UI_TEXTAREA_BORDER_COLOR), LV_PART_MAIN);
+//	lv_obj_set_style_border_width(obj, 1, LV_PART_MAIN);
+//	 lv_textarea_set_one_line(obj, true);
+//	 lv_obj_set_size(obj, 460, button_h);
+//	 lv_obj_set_pos(obj, x, y);
+//	 /* Make the server text area read-only: remove edit callback and disable click/focus
+//		 so the user can't edit it via touch/keyboard. */
+//	 lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_CLICK_FOCUSABLE);
+//	 ui_ble_server_log_text = obj;
 	
 	
 	// client 
@@ -439,12 +530,12 @@ void ui_ble_screen_init()
 	lv_obj_set_pos(obj, 100, y); ui_ble_total_received = obj;
 	ui_ble_switch_screen(0);
 	
-	ui_change_button_color(ui_ble_server_xmit_enabled, 
+	ui_change_button_color(btn_show_rx, 
 			systemconfig.bluetooth.xmit_enabled == 0? 0x696969: 0x04fa05,
 			0x0
 		);
 
-	ui_change_button_color(ui_ble_server_receive_enabled, 
+	ui_change_button_color(btn_show_tx, 
 			systemconfig.bluetooth.recv_enabled == 0? 0x696969: 0x04fa05,
 			0x0
 		);
@@ -521,4 +612,122 @@ void ui_ble_set_received_data(BleRemoteDevice* dev)
 void ui_ble_set_servername(char* name)
 {
 	if (ui_ble_server_name)  lv_label_set_text(ui_ble_server_name, name); 
+}
+
+void add_line(const char* log, uint32_t color, bool isHex) {
+	uint16_t index = log_head % UI_LOG_MAX_LINE;
+	memset(temp_string1, 0, 1024);
+	memset(temp_string2, 0, 256);
+	lv_obj_t* obj = lv_obj_get_child(log_panel, index);
+	lv_obj_set_height(obj, LV_SIZE_CONTENT);
+	lv_obj_set_style_text_color(obj, lv_color_hex(color), LV_PART_MAIN);
+	if (isHex)
+	{
+		uint16_t numberofcharcterstoadd = 16;
+		uint16_t len =  strlen(log);
+		if (numberofcharcterstoadd > len) numberofcharcterstoadd = len;
+		int count = 0;
+		char* hexString = temp_string1;
+		char* asciiString = temp_string2;
+		
+		while (count < len)
+		{
+			sprintf(hexString, "%02X ", log[count]); hexString += 3;
+			
+			if ((log[count] >= ' ') & (log[count] <= 127))
+			{
+				*asciiString = (char)(log[count]);
+			}
+			else
+			{
+				*asciiString = '.';
+			}
+			asciiString++;
+			count++;
+			if ((count & 7) == 0)//we just got to 8 characters so display them and go to next line
+			{
+				*hexString = ' '; hexString++;
+				strcpy(hexString, temp_string2);
+				hexString += strlen(temp_string2);
+				temp_string2[0] = '\0';
+				*hexString = '\n';
+				hexString++; 
+				asciiString = temp_string2;
+			}
+		}
+		int fill = (3 * (8 - (count & 7))); //lets see how many characters we need
+		for (count = 0; count < fill - 1; count++)
+		{ 
+			*hexString = '-';
+			hexString++;
+		}
+		*hexString = ' '; hexString++;
+		*hexString = ' '; hexString++;
+		strcpy(hexString, temp_string2);
+		lv_label_set_text(obj, temp_string1);	
+	}
+	else
+	{
+		lv_label_set_text(obj, log);
+	}
+	//lv_obj_set_style_bg_color(obj, lv_color_hex(0x550055), LV_PART_MAIN);
+	
+	log_head++;
+	log_tail = log_head < UI_LOG_MAX_LINE ? 0 : log_head - UI_LOG_MAX_LINE;
+	
+	uint16_t gap = 2;
+	uint16_t ypos = 5;
+	uint16_t idx = 0;
+	uint16_t height = 0;
+	for (index = log_tail; index < log_head; index++)
+	{
+		idx = index % UI_LOG_MAX_LINE;
+		obj = lv_obj_get_child(log_panel, idx);
+		lv_obj_set_y(obj, ypos);
+		lv_obj_clear_flag(obj, LV_OBJ_FLAG_HIDDEN);
+		height = lv_obj_get_height(obj);
+		ypos += height + gap;
+	}
+	lv_obj_scroll_to_y(log_panel, ypos, LV_ANIM_OFF);
+}
+
+void add_char(const char code, uint32_t color)
+{
+	switch (code)
+	{
+	case PING_CHAR:
+		add_line("Send ping 0x7", UI_SEND_COLOR, false);
+		break;
+	case PING_REPLY:
+		add_line("Reply ping 0x6", UI_RECEIVE_COLOR, false);
+		break;
+	}	
+}
+void add_log(char* log, uint32_t color)
+{
+	if (!log) return;
+	int len = strlen(log);
+	//log[len] = 0;
+	if (!lv_obj_is_visible(log_panel)) return;
+//	if ((color == UI_RECEIVE_COLOR && ui_simple_is_rcv) || //incomming data
+//		(color == UI_SEND_COLOR && ui_simple_is_xmt))
+//	{
+		add_line(log, color, Hex_Format);
+//	}
+}
+
+void ClearLog()
+{
+	log_head = 0;
+	log_tail = 0;
+	lv_obj_t* obj;
+	//lv_obj_add_flag(ui_simple_func_menu, LV_OBJ_FLAG_HIDDEN);
+	int count = lv_obj_get_child_cnt(log_panel);
+	for (uint8_t i = 0; i < count; i++)
+	{
+		obj = lv_obj_get_child(log_panel, i); 
+		lv_label_set_text(obj, "");
+		lv_obj_set_x(obj, 5); 
+		lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
+	}
 }

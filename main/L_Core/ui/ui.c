@@ -240,6 +240,7 @@ void ui_create_pct_title(lv_obj_t* parent, uint8_t screen)
 		break;
 	case SCREEN_WIFI:
 	case SCREEN_SECS:
+	case SCREEN_BLUETOOTH:
 		lv_obj_set_pos(logbutton, 1, 5);
 		obj = ui_create_button(parent, "CLR", button_large_width, button_h, 2, &lv_font_montserrat_16, ui_event_title_button_cb, (void*)UI_BTN_CLEAR);
 		lv_obj_set_pos(obj, x += button_large_width + gap, 2);
@@ -258,7 +259,6 @@ void ui_create_pct_title(lv_obj_t* parent, uint8_t screen)
 	case SCREEN_SETTINGS:
 	case SCREEN_CONTROLS:
 	case SCREEN_VARIABLES:
-	case SCREEN_BLUETOOTH:
 		lv_obj_set_pos(logbutton, 380, 5);
 		break;
 	// case SCREEN_SDCARD:
