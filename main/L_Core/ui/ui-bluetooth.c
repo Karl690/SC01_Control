@@ -55,6 +55,7 @@ bool Show_xmt = false;
 bool Hex_Format = false;
 bool Sent_Blink = false;
 bool Rcvd_Blink = false;
+bool refreshRequest = false;
 
 void ui_ble_switch_screen(uint8_t screen)
 {
@@ -98,7 +99,7 @@ void ui_ble_button_callback(lv_event_t* e) {
 	int code = (int)lv_event_get_user_data(e);
 	switch (code)
 	{
-	case UI_SIMPLE_BTN_XMIT:
+	case BTN_XMIT:
 		systemconfig.bluetooth.xmit_enabled = !systemconfig.bluetooth.xmit_enabled;
 		Show_xmt = systemconfig.bluetooth.xmit_enabled;
 		ui_change_button_color(btn_show_tx, 
@@ -106,7 +107,7 @@ void ui_ble_button_callback(lv_event_t* e) {
 			0x0
 		);
 		break;
-	case UI_SIMPLE_BTN_RCV:
+	case BTN_RCV:
 		systemconfig.bluetooth.recv_enabled = !systemconfig.bluetooth.recv_enabled;
 		Show_rcv = systemconfig.bluetooth.recv_enabled;
 		ui_change_button_color(btn_show_rx, 
@@ -114,7 +115,7 @@ void ui_ble_button_callback(lv_event_t* e) {
 			0x0
 		);
 		break;
-	case UI_SIMPLE_BTN_HEX:
+	case BTN_HEX:
 		//lv_obj_add_flag(ui_simple_func_menu, LV_OBJ_FLAG_HIDDEN);
 		Hex_Format = !Hex_Format;
 		ui_change_button_color(btn_hex_display, 
@@ -122,7 +123,7 @@ void ui_ble_button_callback(lv_event_t* e) {
 			0x0
 			);
 		break;
-	case UI_SIMPLE_BTN_CLEAR:
+	case BTN_CLEAR:
 		ClearLog();
 		break;
 	default:
@@ -232,38 +233,46 @@ void ui_ble_scan_event_cb(lv_event_t* e)
 
 void ui_ble_timer_handler(lv_timer_t* timer)
 {
-	//if (ble_server_send_blink_count)ble_server_send_blink_count--; 
-	if (!lv_obj_is_visible(ui_ble_screen)) return;
-	if (ble_server_send_blink_count > 0)
-	{
-		lv_obj_set_style_text_color(lbl_tx_indicator, lv_color_hex(ble_server_send_blink_count % 2 ? UI_BUTTON_NORMAL_BG_COLOR : UI_BUTTON_NORMAL_FG_COLOR), LV_PART_MAIN);
-		ble_server_send_blink_count--;
+	if (ble_server_send_blink_count)ble_server_send_blink_count--; //count down the timers
+	if (ble_server_receive_blink_count)ble_server_receive_blink_count--;
+	
+	if (!lv_obj_is_visible(ui_ble_screen)) return;//dont waste time painting if Not visible
+	
+	if (ble_server_send_blink_count >1)
+	{//turn on activity indicating down arrow
+		lv_obj_set_style_text_color(lbl_tx_indicator, lv_color_hex(UI_BUTTON_NORMAL_FG_COLOR), LV_PART_MAIN);
 	}
-	else 
-	{
+	else if(ble_server_send_blink_count==1)
+	{//timed out 
 		lv_obj_set_style_text_color(lbl_tx_indicator, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);
 	}
-	if (ble_server_receive_blink_count > 0)
+	if (ble_server_receive_blink_count > 1)
 	{
-		lv_obj_set_style_text_color(lbl_rx_indicator, lv_color_hex(ble_server_receive_blink_count % 2 ? UI_BUTTON_NORMAL_BG_COLOR : UI_BUTTON_NORMAL_FG_COLOR), LV_PART_MAIN);
-		ble_server_receive_blink_count--;
+		lv_obj_set_style_text_color(lbl_rx_indicator, lv_color_hex(UI_BUTTON_NORMAL_FG_COLOR), LV_PART_MAIN);
 	}
-	else
+	else if(ble_server_receive_blink_count==1)
 	{
 		lv_obj_set_style_text_color(lbl_rx_indicator, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);
 	}
 
-	if (ble_last_direction == 0 && systemconfig.bluetooth.xmit_enabled) 
+	if (systemconfig.bluetooth.xmit_enabled) 
 	{
 		// xmit karlchris   this is where we will plug in the display data
-		add_log(ble_last_data_sent, UI_SEND_COLOR);
-//		lv_textarea_set_text(ui_ble_server_log_text, ble_last_data);
-//		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(UI_SEND_COLOR), LV_PART_MAIN);
-	} else 
-	if (ble_last_direction == 1 && systemconfig.bluetooth.recv_enabled)
+		if (ble_last_data_sent[0])
+		{
+			add_log(ble_last_data_sent, UI_SEND_COLOR);
+			ble_last_data_sent[0] = 0;//turn off the flag
+		}
+	}
+	
+	if (systemconfig.bluetooth.recv_enabled)
 	{
 		// recv
-		add_log(ble_last_data_rcvd, UI_RECEIVE_COLOR);
+		if (ble_last_data_rcvd[0])
+		{
+			add_log(ble_last_data_rcvd, UI_RECEIVE_COLOR);
+			ble_last_data_rcvd[0] = 0; //turn off the flag
+		}
 	}
 }
 
@@ -388,7 +397,7 @@ void ui_ble_screen_init()
 	button_h = 45;
 	gap = 5;
 	//next is the clear button
-	obj = ui_create_button(ui_ble_server_panel, "CLR", button_w, button_h, 2, &lv_font_montserrat_16, ui_ble_button_callback, (void*)UI_SIMPLE_BTN_CLEAR);
+	obj = ui_create_button(ui_ble_server_panel, "CLR", button_w, button_h, 2, &lv_font_montserrat_16, ui_ble_button_callback, (void*)BTN_CLEAR);
 	//ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
 	ui_change_button_color(obj, UI_CHECK_NONACTIVE_COLOR, UI_BUTTON_NORMAL_FG_COLOR);
 	//UI_CHECK_NONACTIVE_COLOR)
@@ -410,13 +419,13 @@ void ui_ble_screen_init()
 	y += 25;
 
 	
-	obj = ui_create_button(ui_ble_server_panel, "XMT", button_w, button_h, 2, font, ui_ble_button_callback, (void*)UI_SIMPLE_BTN_XMIT);
+	obj = ui_create_button(ui_ble_server_panel, "XMT", button_w, button_h, 2, font, ui_ble_button_callback, (void*)BTN_XMIT);
 	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
 	lv_obj_set_pos(obj, x, y);
 	btn_show_tx = obj;
 	
 	y += button_h + gap;
-	obj = ui_create_button(ui_ble_server_panel, "RCV", button_w, button_h, 2, font, ui_ble_button_callback, (void*)UI_SIMPLE_BTN_RCV);
+	obj = ui_create_button(ui_ble_server_panel, "RCV", button_w, button_h, 2, font, ui_ble_button_callback, (void*)BTN_RCV);
 	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
 	lv_obj_set_pos(obj, x, y);
 	btn_show_rx = obj;
@@ -434,7 +443,7 @@ void ui_ble_screen_init()
 	lbl_rx_num = obj;
 	
 	y += 25;
-	obj = ui_create_button(ui_ble_server_panel, "HEX", button_w, button_h, 2, font, ui_ble_button_callback, (void*)UI_SIMPLE_BTN_HEX);
+	obj = ui_create_button(ui_ble_server_panel, "HEX", button_w, button_h, 2, font, ui_ble_button_callback, (void*)BTN_HEX);
 	//ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
 	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_NORMAL_FG_COLOR);
 	lv_obj_set_pos(obj, x, y);

@@ -7,6 +7,7 @@ extern lv_obj_t* ui_ble_server_sent_status;
 extern lv_obj_t* ui_ble_server_receive_status;
 extern char ble_last_data_sent[];
 extern char ble_last_data_rcvd[];
+extern bool refreshRequest;
 void ui_ble_screen_init();
 void ui_ble_changed_ble_status(uint8_t status);
 void ui_ble_add_device(void* dev);

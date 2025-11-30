@@ -19,6 +19,7 @@ typedef struct _tagUiControl {
 	lv_obj_t* raw_cnt2;
 } UI_CONTROL;
 
+extern bool refreshRequest;
 extern lv_obj_t* ui_control_screen;
 void ui_control_screen_init();
 void ui_control_refresh();

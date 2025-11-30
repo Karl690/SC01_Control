@@ -6,46 +6,67 @@
 #include "K_Core/taskmanager.h"
 #include "L_Core/bluetooth/ble.h"
 #include "K_Core/communication/communication.h"
+#include "L_Core/ui/ui-simple.h"
 lv_obj_t* ui_control_screen;
 UI_CONTROL ui_control;
-void ui_control_send_ble_command(CONTROLS_BUTTON_LIST buttonId) {
-	sprintf(ui_temp_string, ">BT:Btn T66 %d\n", (int)buttonId);
-	communication_add_string_to_ble_buffer(&bleDevice.TxBuffer, ui_temp_string);
+void ui_control_send_ble_command(CONTROLS_BUTTON_LIST buttonId) 
+{
+//	sprintf(ui_temp_string, ">BT:Btn T66 %d\n", (int)buttonId);
+//	communication_add_string_to_ble_buffer(&bleDevice.TxBuffer, ui_temp_string);
 }
 void ui_control_button_handler(lv_event_t * e) {
-	lv_obj_t* obj = lv_event_get_target(e);
-	systemconfig.pcnt.enabled = systemconfig.pcnt.enabled == 1 ? 0 : 1;
-	
-	ui_control_send_ble_command(TEMP_ONOFF);
-	save_configuration();
-	// ui_show_messagebox(systemconfig.pcnt.enabled ? MESSAGEBOX_INFO: MESSAGEBOX_ERROR, systemconfig.pcnt.enabled ? "TEMP CTRL is enabled" : "TEMP CTRL is disabled" , 1000);
-}
-
-void ui_control_temp_ctrl_handler(lv_event_t* e) {
 	int code = (int)lv_event_get_user_data(e);
 	int temp = systemconfig.pcnt.programmed_temperature;
-	int direction = 0;
+
 	
-	switch(code) {
-	case 0:
-		direction = -1;
-		ui_control_send_ble_command(TEMP_DECREASE);
+	switch (code) 
+	{
+	case BTN_TEMP_DECREASE:
+		temp -= 1;
 		break;
-	case 1:
-		direction = 1;
-		ui_control_send_ble_command(TEMP_INCREASE);
+	case BTN_TEMP_INCREASE:
+		temp += 1;
+		//ui_control_send_ble_command(TEMP_INCREASE);
+		break;
+	case BTN_TEMP_ONOFF:
+		systemconfig.pcnt.enabled = systemconfig.pcnt.enabled == 1 ? 0 : 1;
+		//ui_control_send_ble_command(BTN_TEMP_ONOFF);
 		break;
 	}
-
-	temp += direction;
+	
 	if (temp < 0) temp = 0;
 	else if (temp > 300) temp = 300;
 	systemconfig.pcnt.programmed_temperature = temp;
-	sprintf(ui_temp_string, "%d'C", systemconfig.pcnt.programmed_temperature);
-	save_configuration();
-	lv_label_set_text(ui_control.programmed_temp, ui_temp_string);//pcnt_info.temperature
-	
+	refreshRequest = true;
+
+	//	save_configuration(); //only if we want to update default every time we prees key
 }
+
+//void ui_control_temp_ctrl_handler(lv_event_t* e) {
+//	int code = (int)lv_event_get_user_data(e);
+//	int temp = systemconfig.pcnt.programmed_temperature;
+//	int direction = 0;
+//	
+//	switch(code) {
+//	case 0:
+//		direction = -1;
+//		ui_control_send_ble_command(TEMP_DECREASE);
+//		break;
+//	case 1:
+//		direction = 1;
+//		ui_control_send_ble_command(TEMP_INCREASE);
+//		break;
+//	}
+//
+//	temp += direction;
+//	if (temp < 0) temp = 0;
+//	else if (temp > 300) temp = 300;
+//	systemconfig.pcnt.programmed_temperature = temp;
+//	sprintf(ui_temp_string, "%d'C", systemconfig.pcnt.programmed_temperature);
+//	save_configuration();
+//	lv_label_set_text(ui_control.programmed_temp, ui_temp_string);//pcnt_info.temperature
+//	
+//}
 
 void ui_control_refresh() {
 
@@ -53,6 +74,9 @@ void ui_control_refresh() {
 
 	ui_change_button_color(ui_control.onoff, systemconfig.pcnt.enabled == 1? 0x00ff00 : 0xff0000, 0xffffff);
 	ui_change_button_text(ui_control.onoff, systemconfig.pcnt.enabled? "ON": "OFF");
+	
+	sprintf(ui_temp_string, "%d'C", systemconfig.pcnt.programmed_temperature);
+	lv_label_set_text(ui_control.programmed_temp, ui_temp_string); //pcnt_info.temperature
 
 	sprintf(ui_temp_string, "%.1f'C", pcnt_info.temperature);
 	lv_label_set_text(ui_control.temp, ui_temp_string);//pcnt_info.temperature
@@ -107,7 +131,7 @@ void ui_control_screen_init()
 	lv_obj_set_pos(obj, 5, 5);
 	ui_control.hb = obj;
 
-	obj = ui_create_button(panel, systemconfig.pcnt.enabled ? "ON": "OFF", 120, 130, 10, &lv_font_montserrat_48, ui_control_button_handler, (void*)NULL);
+	obj = ui_create_button(panel, systemconfig.pcnt.enabled ? "ON" : "OFF", 120, 130, 10, &lv_font_montserrat_48, ui_control_button_handler, (void*)BTN_TEMP_ONOFF);
 	ui_change_button_color(obj, systemconfig.pcnt.enabled == 1? 0x00ff00 : 0xff0000, 0xffffff);
 	lv_obj_set_pos(obj, 5, 5);
 	ui_control.onoff = obj;
@@ -141,7 +165,7 @@ void ui_control_screen_init()
 	lv_obj_set_pos(obj, 270, 110);
 	ui_control.raw_cnt2 = obj;
 	
-	obj = ui_create_button(panel, LV_SYMBOL_DOWN, 70, 70, 10, &lv_font_montserrat_48, ui_control_temp_ctrl_handler, (void*)0);
+	obj = ui_create_button(panel, LV_SYMBOL_DOWN, 70, 70, 10, &lv_font_montserrat_48, ui_control_button_handler, (void*)BTN_TEMP_DECREASE);
 	ui_change_button_color(obj, 0x04c9f3, 0xffffff);
 	lv_obj_set_pos(obj, 5, 150);
 
@@ -155,7 +179,7 @@ void ui_control_screen_init()
 	lv_obj_set_pos(obj, 90, 180);
 	ui_control.programmed_temp = obj;
 
-	obj = ui_create_button(panel, LV_SYMBOL_UP, 70, 70, 10, &lv_font_montserrat_48, ui_control_temp_ctrl_handler, (void*)1);
+	obj = ui_create_button(panel, LV_SYMBOL_UP, 70, 70, 10, &lv_font_montserrat_48, ui_control_button_handler, (void*)BTN_TEMP_INCREASE);
 	ui_change_button_color(obj, 0xfd1d47, 0xffffff);
 	lv_obj_set_pos(obj, 180, 150);
 	

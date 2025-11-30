@@ -58,27 +58,27 @@ void ui_simple_call_event_button(uint8_t code, bool direct)
 	ui_send_button_event(SCREEN_SIMPLE, code, direct);
 	switch (code)
 	{
-	case UI_SIMPLE_BTN_RCV:
+	case BTN_RCV:
 		lv_obj_add_flag(ui_simple_func_menu, LV_OBJ_FLAG_HIDDEN);
 		ui_simple_is_rcv = !ui_simple_is_rcv;
 		ui_change_button_color(ui_simple_obj.btn_rx, ui_simple_is_rcv ? UI_BUTTON_ACTIVE_BG_COLOR : UI_BUTTON_DISABLE_BG_COLOR, ui_simple_is_rcv ? UI_BUTTON_ACTIVE_FG_COLOR : UI_BUTTON_DISABLE_FG_COLOR);
 		break;
-	case UI_SIMPLE_BTN_XMIT:
+	case BTN_XMIT:
 		lv_obj_add_flag(ui_simple_func_menu, LV_OBJ_FLAG_HIDDEN);
 		ui_simple_is_xmt = !ui_simple_is_xmt;
 		ui_change_button_color(ui_simple_obj.btn_tx, ui_simple_is_xmt ? UI_BUTTON_ACTIVE_BG_COLOR : UI_BUTTON_DISABLE_BG_COLOR, ui_simple_is_xmt ? UI_BUTTON_ACTIVE_FG_COLOR : UI_BUTTON_DISABLE_FG_COLOR);
 		break;
-	case UI_SIMPLE_BTN_HEX:
+	case BTN_HEX:
 		lv_obj_add_flag(ui_simple_func_menu, LV_OBJ_FLAG_HIDDEN);
 		ui_simple_is_hex = !ui_simple_is_hex;
 		ui_change_button_color(ui_simple_obj.btn_hex, ui_simple_is_hex ? UI_BUTTON_ACTIVE_BG_COLOR : UI_BUTTON_DISABLE_BG_COLOR, ui_simple_is_hex ? UI_BUTTON_ACTIVE_FG_COLOR : UI_BUTTON_DISABLE_FG_COLOR);
 		break;
-	case UI_SIMPLE_BTN_BLE:
+	case BTN_BLE:
 		lv_obj_add_flag(ui_simple_func_menu, LV_OBJ_FLAG_HIDDEN);
 		ui_simple_is_ble = !ui_simple_is_ble;
 		ui_change_button_color(ui_simple_obj.btn_ble, ui_simple_is_ble ? UI_BUTTON_ACTIVE_BG_COLOR : UI_BUTTON_DISABLE_BG_COLOR, ui_simple_is_ble ? UI_BUTTON_ACTIVE_FG_COLOR : UI_BUTTON_DISABLE_FG_COLOR);
 		break;
-	case UI_SIMPLE_BTN_FUNCS:
+	case BTN_FUNCS:
 		if (lv_obj_is_visible(ui_simple_func_menu)) 
 		{
 			lv_obj_add_flag(ui_simple_func_menu, LV_OBJ_FLAG_HIDDEN);
@@ -120,13 +120,13 @@ void ui_simple_log_view_init(lv_obj_t* panel)
 	ui_simple_obj.tx_num = obj;
 	y += 25;
 	
-	obj = ui_create_button(panel, "XMT", button_w, button_h, 2, font, ui_simple_event_button_cb, (void*)UI_SIMPLE_BTN_XMIT);
+	obj = ui_create_button(panel, "XMT", button_w, button_h, 2, font, ui_simple_event_button_cb, (void*)BTN_XMIT);
 	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
 	lv_obj_set_pos(obj, x, y);
 	ui_simple_obj.btn_tx = obj;
 	
 	y += button_h + gap;
-	obj = ui_create_button(panel, "RCV", button_w, button_h, 2, font, ui_simple_event_button_cb, (void*)UI_SIMPLE_BTN_RCV);
+	obj = ui_create_button(panel, "RCV", button_w, button_h, 2, font, ui_simple_event_button_cb, (void*)BTN_RCV);
 	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
 	lv_obj_set_pos(obj, x, y);
 	ui_simple_obj.btn_rx = obj;
@@ -144,13 +144,13 @@ void ui_simple_log_view_init(lv_obj_t* panel)
 	ui_simple_obj.rx_num = obj;
 	
 	y += 25;
-	obj = ui_create_button(panel, "HEX", button_w, button_h, 2, font, ui_simple_event_button_cb, (void*)UI_SIMPLE_BTN_HEX);
+	obj = ui_create_button(panel, "HEX", button_w, button_h, 2, font, ui_simple_event_button_cb, (void*)BTN_HEX);
 	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
 	lv_obj_set_pos(obj, x, y);
 	ui_simple_obj.btn_hex = obj;
 
 	y += button_h + gap;
-	obj = ui_create_button(panel, "BLE", button_w, button_h, 2, font, ui_simple_event_button_cb, (void*)UI_SIMPLE_BTN_BLE);
+	obj = ui_create_button(panel, "BLE", button_w, button_h, 2, font, ui_simple_event_button_cb, (void*)BTN_BLE);
 	ui_change_button_color(obj, UI_BUTTON_DISABLE_BG_COLOR, UI_BUTTON_DISABLE_FG_COLOR);
 	lv_obj_set_pos(obj, x, y);
 	ui_simple_obj.btn_ble = obj;
@@ -241,7 +241,7 @@ void ui_simple_screen_init(void)
 	uint8_t tab_x = 225;
 	lv_obj_t* obj;
 	
-	obj = ui_create_button(ui_simple_screen, "FUNCS", tab_width, 50, 2, &lv_font_montserrat_16, ui_simple_event_button_cb, (void*)UI_SIMPLE_BTN_FUNCS);
+	obj = ui_create_button(ui_simple_screen, "FUNCS", tab_width, 50, 2, &lv_font_montserrat_16, ui_simple_event_button_cb, (void*)BTN_FUNCS);
 	lv_obj_set_pos(obj, tab_x + tab_width * 2 +4, 2);
 	
 	lv_obj_t* panel = lv_obj_create(ui_simple_screen);
