@@ -53,6 +53,8 @@ ble_server_status_t  prev_ble_server_status = BLE_SERVER_LISTENING;
 bool Show_rcv = false;
 bool Show_xmt = false;
 bool Hex_Format = false;
+bool Sent_Blink = false;
+bool Rcvd_Blink = false;
 
 void ui_ble_switch_screen(uint8_t screen)
 {
@@ -116,7 +118,7 @@ void ui_ble_button_callback(lv_event_t* e) {
 		//lv_obj_add_flag(ui_simple_func_menu, LV_OBJ_FLAG_HIDDEN);
 		Hex_Format = !Hex_Format;
 		ui_change_button_color(btn_hex_display, 
-			Hex_Format ? 0x696969: 0x04fa05,
+			!Hex_Format ? 0x696969: 0x04fa05,
 			0x0
 			);
 		break;
@@ -230,13 +232,15 @@ void ui_ble_scan_event_cb(lv_event_t* e)
 
 void ui_ble_timer_handler(lv_timer_t* timer)
 {
+	//if (ble_server_send_blink_count)ble_server_send_blink_count--; 
 	if (!lv_obj_is_visible(ui_ble_screen)) return;
 	if (ble_server_send_blink_count > 0)
 	{
 		lv_obj_set_style_text_color(lbl_tx_indicator, lv_color_hex(ble_server_send_blink_count % 2 ? UI_BUTTON_NORMAL_BG_COLOR : UI_BUTTON_NORMAL_FG_COLOR), LV_PART_MAIN);
 		ble_server_send_blink_count--;
 	}
-	else {
+	else 
+	{
 		lv_obj_set_style_text_color(lbl_tx_indicator, lv_color_hex(UI_BUTTON_DISABLE_BG_COLOR), LV_PART_MAIN);
 	}
 	if (ble_server_receive_blink_count > 0)
@@ -252,14 +256,14 @@ void ui_ble_timer_handler(lv_timer_t* timer)
 	if (ble_last_direction == 0 && systemconfig.bluetooth.xmit_enabled) 
 	{
 		// xmit karlchris   this is where we will plug in the display data
-		add_log(ble_last_data, UI_SEND_COLOR);
+		add_log(ble_last_data_sent, UI_SEND_COLOR);
 //		lv_textarea_set_text(ui_ble_server_log_text, ble_last_data);
 //		lv_obj_set_style_text_color(ui_ble_server_log_text, lv_color_hex(UI_SEND_COLOR), LV_PART_MAIN);
 	} else 
 	if (ble_last_direction == 1 && systemconfig.bluetooth.recv_enabled)
 	{
 		// recv
-		add_log(ble_last_data, UI_RECEIVE_COLOR);
+		add_log(ble_last_data_rcvd, UI_RECEIVE_COLOR);
 	}
 }
 

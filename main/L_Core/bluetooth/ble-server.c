@@ -13,7 +13,8 @@ ble_server_status_t ble_server_status = BLE_SERVER_LISTENING;
 uint8_t ble_server_send_blink_count = 0;
 uint8_t ble_server_receive_blink_count = 0;
 char ble_tmp[256] = { 0 };
-char ble_last_data[256];
+char ble_last_data_sent[256];
+char ble_last_data_rcvd[256];
 uint8_t ble_last_direction = 2; // NONE
 /// SPP Service
 const uint16_t spp_service_uuid = SPP_SERVICE_UUID;
@@ -479,7 +480,8 @@ uint8_t ble_server_send_data(uint8_t* data, uint16_t size)
 	if (!is_server_connected) return 0;
 	ble_server_send_blink_count = 5;	
 	ble_server_total_sent += size;
-	memcpy(ble_last_data, data, size);
+	memcpy(ble_last_data_sent, data, size);
+	ble_last_data_sent[size] = 0;
 	ble_last_direction = 0; //0: XMIT
 	esp_err_t err = esp_ble_gatts_send_indicate(spp_gatts_if, spp_server_conn_id, spp_handle_table[SPP_IDX_SPP_DATA_NTY_VAL], size, data, false);	
 	if (err != ESP_OK) return 0;
@@ -491,7 +493,8 @@ void ble_server_received_data(uint8_t* data, uint16_t size)
 	ble_server_receive_blink_count = 5;
 	ble_server_total_received += size;
 	communication_add_buffer_to_ble_buffer(&bleDevice.RxBuffer, data, size);	
-	memcpy(ble_last_data, data, size > 255? 255: size);
+	memcpy(ble_last_data_rcvd, data, size > 255? 255: size);
+	ble_last_data_rcvd[size] = 0;
 	ble_last_direction = 1; //1: RECV
 }
 //////////////////////////////////////////////////////////////////////////////
