@@ -125,12 +125,28 @@ void Calculate_Heater_DutyCycle() {
 //	pcnt_info.duty++; //change by 1 each second
 //	if (pcnt_info.duty > 16)pcnt_info.duty = 0;
 //	return;
+	int mode = systemconfig.mode.option;//heat or chill mode
+	
 	if (systemconfig.pcnt.enabled)
 	{
+		if (mode == 1)
+		{//heating mode
 		float deltaTemp = systemconfig.pcnt.programmed_temperature - pcnt_info.temperature;
 		if (deltaTemp < 0)deltaTemp = 0;
-		pcnt_info.duty = (int)deltaTemp;
+			deltaTemp += 2;
+		pcnt_info.duty = (int)deltaTemp*5;
 		return;
+		}
+		if (mode == 2)
+		{
+			//heating mode
+			float deltaTemp = pcnt_info.temperature-systemconfig.pcnt.programmed_temperature;
+			if (deltaTemp < 0)deltaTemp = 0;
+			deltaTemp += 2;
+			pcnt_info.duty = (int)deltaTemp*8;
+			return;
+		}
+		
 	}
 	pcnt_info.duty = 0;
 }

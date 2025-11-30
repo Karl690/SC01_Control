@@ -13,6 +13,8 @@
 #include "K_Core/pcnt/pcnt.h"
 #include "K_Core/communication/communication.h"
 #include "K_Core/execution/sequencer.h"
+#include "L_Core/ui/ui-settings.h"
+
 
 esp_timer_handle_t systickTimer;
 
