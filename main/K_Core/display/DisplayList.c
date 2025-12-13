@@ -16,11 +16,14 @@ DisplayVariableInfo LcdVarsTable[] = {
 	{ &RTDsampleHistory[2], "RTD2= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
 	{ &RTDsampleHistory[3], "RTD3= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
 	{ &RTDsampleHistory[4], "RTD4= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
-	{ &RTDsampleHistory[5], "RTD5= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
-	{ &RTDsampleHistory[6], "RTD6= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
-	{ &RTDsampleHistory[7], "RTD7= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
-	{ &RTDsampleHistory[8], "RTD8= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
-	{ &RTDsampleHistory[9], "RTD9= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	
+//	{ &RTDsampleHistory[5], "RTD5= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+//	{ &RTDsampleHistory[6], "RTD6= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+//	{ &RTDsampleHistory[7], "RTD7= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+//	{ &RTDsampleHistory[8], "RTD8= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &RTDsampleHistory[10], "AVG= ", FUNC_INT16, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+	{ &pcnt_info.rtd_volt, "RTDV= ", FUNC_FLOAT, COLOR_WHITE, COLOR_RED, 0, 0, NULL },
+		
 	{0},
 };
 

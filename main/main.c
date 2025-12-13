@@ -13,6 +13,7 @@
 #include "K_Core/display/DisplayList.h"
 #include "K_Core/execution/cmdprocessor.h"
 #include "K_Core/pcnt/pcnt.h"
+#include "K_Core/gpio/gpio.h"
 
 const char *TAG = "L_Core";
 bool IsInitialized = false;
@@ -31,6 +32,7 @@ extern "C" void app_main(void)
 		ESP_ERROR_CHECK(nvs_flash_erase());
 		ret = nvs_flash_init();
 	}
+	gpio_init();
 	ESP_ERROR_CHECK(ret);
 	
 	IsInitialized = false;

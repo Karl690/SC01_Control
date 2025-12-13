@@ -7,6 +7,7 @@
 #include "L_Core/bluetooth/ble.h"
 #include "K_Core/communication/communication.h"
 #include "L_Core/ui/ui-simple.h"
+#include "RevisionHistory.h"
 lv_obj_t* ui_control_screen;
 UI_CONTROL ui_control;
 void ui_control_send_ble_command(CONTROLS_BUTTON_LIST buttonId) 
@@ -115,7 +116,7 @@ void ui_control_screen_init()
 	lv_obj_set_height(title_label, LV_SIZE_CONTENT);
 	lv_label_set_recolor(title_label, true);
 	lv_obj_set_style_text_color(title_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
-	lv_label_set_text(title_label, "HYREL CONTROL");
+	lv_label_set_text(title_label, CONTROLLABEL);
 	lv_obj_set_style_text_font(title_label, &lv_font_montserrat_30, LV_PART_MAIN | LV_STATE_DEFAULT);	
 	lv_obj_align(title_label, LV_ALIGN_TOP_MID, 0, 5);
 	

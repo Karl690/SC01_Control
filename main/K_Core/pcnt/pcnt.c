@@ -11,7 +11,7 @@ PCNT_INFO pcnt_info = { 0, 0, 0, 0, 0, 0 };
 #define MAX_TEMP                        0x7fff  // max positive
 //#define ADC_NUM_SAMPLES                 10  // 10 values saved; toss high and low to get average
 //#define ADC_SHIFT_FOR_AVG               3
-int16_t     RTDsampleHistory[ADC_NUM_SAMPLES]; // last N reads from ADC
+int16_t     RTDsampleHistory[ADC_NUM_SAMPLES+1]; // last N reads from ADC
 int16_t     BatterysampleHistory[ADC_NUM_SAMPLES]; // last N reads from ADC
 int16_t SmoothSampleIndex = 0;
 
@@ -131,10 +131,17 @@ void Calculate_Heater_DutyCycle() {
 	{
 		if (mode == 1)
 		{//heating mode
-		float deltaTemp = systemconfig.pcnt.programmed_temperature - pcnt_info.temperature;
-		if (deltaTemp < 0)deltaTemp = 0;
-			deltaTemp += 2;
-		pcnt_info.duty = (int)deltaTemp*5;
+		float deltaTemp = (systemconfig.pcnt.programmed_temperature+1) - pcnt_info.temperature;
+			if (deltaTemp < 0)
+			{
+				deltaTemp = 0;
+				pcnt_info.duty = 0;
+				return;
+			}
+			else
+			{				
+				pcnt_info.duty = (int)deltaTemp * 5;
+			}
 		return;
 		}
 		if (mode == 2)
@@ -142,7 +149,6 @@ void Calculate_Heater_DutyCycle() {
 			//heating mode
 			float deltaTemp = pcnt_info.temperature-systemconfig.pcnt.programmed_temperature;
 			if (deltaTemp < 0)deltaTemp = 0;
-			deltaTemp += 2;
 			pcnt_info.duty = (int)deltaTemp*8;
 			return;
 		}
@@ -214,8 +220,8 @@ float convertRtdDataFromRawADCValue(const PcntTableStruct* adcTable, float RTD_V
 	//ok at this point were have a index to the first RAW value that is greater than the actual raw
 	//dat a value, we need to make sure our rawdata value falls between the 2 points in the table
 	if (Index > 0) Index--; //if we are already at zero, we will use this pointer, 
-	float DeltaTemperatureValue = adcTable[Index + 1].value - adcTable[Index].value;
-	float DeltaRawData = adcTable[Index + 1].adcRaw - adcTable[Index].adcRaw;
+	float DeltaTemperatureValue = adcTable[Index].value - adcTable[Index-1].value;
+	float DeltaRawData = adcTable[Index].adcRaw - adcTable[Index-1].adcRaw;
 	float conversionCoeffecient = DeltaTemperatureValue / DeltaRawData;
 	//now we have the coeffecient between the 2 points in the table
 	//next we will get the offset value between the first point and the raw data
@@ -228,10 +234,15 @@ float convertRtdDataFromRawADCValue(const PcntTableStruct* adcTable, float RTD_V
 
 void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 {
+	float rtd_count = 0;
+	float deltaRtdVolt = 0;
+	float Res_RTD = 1000;
+	float DeltaRes_Rtd = 0;//zero degrees default should be 1k-1k
+	float calculatedTemperature = 0;
 	RTDsampleHistory[SmoothSampleIndex] = (RawValueRTD + RTDsampleHistory[SmoothSampleIndex]) / 2;
 	BatterysampleHistory[SmoothSampleIndex] = (RawValueBattery + BatterysampleHistory[SmoothSampleIndex]) / 2;
 	SmoothSampleIndex++;
-	if (SmoothSampleIndex > ADC_NUM_SAMPLES)
+	if (SmoothSampleIndex >= ADC_NUM_SAMPLES)
 	{
 		SmoothSampleIndex = 0; 
 
@@ -255,10 +266,22 @@ void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 			if (raw > high)high = raw; // update the highest reading
 		}
 		sum -= (low + high); // sum is now the total of the middle N values
-
+		rtd_count = (float)(sum >> ADC_SHIFT_FOR_AVG);//now we have aa scaled value, but it is 2.5v full scale, not 3.3
+		RTDsampleHistory[ADC_NUM_SAMPLES] = (int16_t)rtd_count;//save for diagnosit display
+		//rtd_count=(rtd_count*25.0f)/33.0f;
 		//next we will shift by n to effect a divide by 2^n to get the average of the 2^n remaining samples
-		RtdVoltage = (float)((float)(sum >> ADC_SHIFT_FOR_AVG) / 3200); //systemconfig.pcnt.rtd_scale;
+		RtdVoltage = (float)(rtd_count / 3218); //systemconfig.pcnt.rtd_scale;
 		pcnt_info.rtd_volt = RtdVoltage; //update global
+//		deltaRtdVolt = 3.3f - RtdVoltage;
+//		Res_RTD = 2000*(deltaRtdVolt / RtdVoltage);//now we should have the resistance in ohms
+//		DeltaRes_Rtd = Res_RTD - 1000;//subtract 1k for 0 deg reference
+//		calculatedTemperature = DeltaRes_Rtd / .0385f;
+		deltaRtdVolt = 3.3f - RtdVoltage;
+		Res_RTD = 2000*(RtdVoltage / deltaRtdVolt); //now we should have the resistance in ohms
+		DeltaRes_Rtd = Res_RTD - 1000; //subtract 1k for 0 deg reference
+		calculatedTemperature = DeltaRes_Rtd /3.85f;
+		//now we can calculate the resistance of the rtd by     ((3.3-rtdvold)/RtdVolt)*2K
+		
 		//now process the Battery data
 
 		low = 0x7fffffff; // MAXINT
@@ -277,6 +300,9 @@ void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 		BatteryVoltage = (float)((float)(sum >> ADC_SHIFT_FOR_AVG) / 1600); //systemconfig.pcnt.rtd_scale;
 		pcnt_info.bat_volt = BatteryVoltage; //update global
 		
+		Temperature = calculatedTemperature;//convertRtdDataFromRawADCValue(RtdTable_1K, ((uint16_t)rtd_count)); //*systemconfig.pcnt.rtd_scale)); //use lookup table to convert voltage to temperature
+		pcnt_info.temperature = Temperature;
+		
 	}
 }
 
@@ -284,11 +310,11 @@ void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 void Read_Counters() {
 	//reads both counter1 and 2, then resets counters to 0, used in 100hz loop
 	//so we are actually getting frequency in 100 hz resolution
-	ESP_ERROR_CHECK(pcnt_unit_get_count(PulseCounter_1, &pcnt_info.count02));
+	ESP_ERROR_CHECK(pcnt_unit_get_count(PulseCounter_1, &pcnt_info.count01));
 	ESP_ERROR_CHECK(pcnt_unit_clear_count(PulseCounter_1));
 
 
-	ESP_ERROR_CHECK(pcnt_unit_get_count(PulseCounter_2, &pcnt_info.count01));
+	ESP_ERROR_CHECK(pcnt_unit_get_count(PulseCounter_2, &pcnt_info.count02));
 	ESP_ERROR_CHECK(pcnt_unit_clear_count(PulseCounter_2));
 
 	//now process the variables into voltage
@@ -331,8 +357,8 @@ void Read_Counters() {
 //	pcnt_info.rtd_volt = RtdVoltage; //update global
 
 	//convert to temperature
-	Temperature = convertRtdDataFromRawADCValue(RtdTable_1K, (RtdVoltage*systemconfig.pcnt.rtd_scale)); //use lookup table to convert voltage to temperature
-	pcnt_info.temperature = Temperature;
+//	Temperature = convertRtdDataFromRawADCValue(RtdTable_1K, (RtdVoltage*systemconfig.pcnt.rtd_scale)); //use lookup table to convert voltage to temperature
+//	pcnt_info.temperature = Temperature;
 	
 	
 	
