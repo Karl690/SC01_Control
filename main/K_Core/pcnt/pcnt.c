@@ -148,8 +148,12 @@ void Calculate_Heater_DutyCycle() {
 		{
 			//heating mode
 			float deltaTemp = pcnt_info.temperature-systemconfig.pcnt.programmed_temperature;
-			if (deltaTemp < 0)deltaTemp = 0;
-			pcnt_info.duty = (int)deltaTemp*8;
+			deltaTemp += 5;
+			if (deltaTemp < 0)pcnt_info.duty = 0;
+			else
+			{
+			pcnt_info.duty = (int)deltaTemp * 3;	
+			}
 			return;
 		}
 		
@@ -159,14 +163,7 @@ void Calculate_Heater_DutyCycle() {
 
 void SetPwmOutput()
 {
-	
-
-	PwmTimerReloadRegister++;
-	if (PwmTimerReloadRegister > 15)PwmTimerReloadRegister = 0;
-			//test pulse 
-	//systemconfig.pcnt.duty_test++; //count up
-	//if (systemconfig.pcnt.duty_test & 0x0001)
-		if (pcnt_info.duty > PwmTimerReloadRegister)
+	if (pcnt_info.duty > PwmTimerReloadRegister)
 	{
 		gpio_set_level(ControlOutput_PIN, 1); //disable the heater until code is stable
 	}
@@ -174,17 +171,8 @@ void SetPwmOutput()
 	{
 		gpio_set_level(ControlOutput_PIN, 0); //disable the heater until code is stable	
 	}
-	//	if (systemconfig.pcnt.duty_test == 0)
-	//	{
-	//		//normal duty cycle process
-	//		PwmTimerReloadRegister = pcnt_info.duty; //setthe reload timer		
-	//	}
-	//	else
-	//	{//first do a range check , duty must be between 0 and 100%
-	//		if (systemconfig.pcnt.duty_test > 100)systemconfig.pcnt.duty_test = 100;
-	//		if (systemconfig.pcnt.duty_test <0)systemconfig.pcnt.duty_test = 0;
-	//		PwmTimerReloadRegister = systemconfig.pcnt.duty_test;
-	//	}
+	PwmTimerReloadRegister++;
+	if (PwmTimerReloadRegister > 31)PwmTimerReloadRegister = 0;
 }
 
 void Scale_BatteryVoltage() {
@@ -272,14 +260,10 @@ void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 		//next we will shift by n to effect a divide by 2^n to get the average of the 2^n remaining samples
 		RtdVoltage = (float)(rtd_count / 3218); //systemconfig.pcnt.rtd_scale;
 		pcnt_info.rtd_volt = RtdVoltage; //update global
-//		deltaRtdVolt = 3.3f - RtdVoltage;
-//		Res_RTD = 2000*(deltaRtdVolt / RtdVoltage);//now we should have the resistance in ohms
-//		DeltaRes_Rtd = Res_RTD - 1000;//subtract 1k for 0 deg reference
-//		calculatedTemperature = DeltaRes_Rtd / .0385f;
 		deltaRtdVolt = 3.3f - RtdVoltage;
 		Res_RTD = 2000*(RtdVoltage / deltaRtdVolt); //now we should have the resistance in ohms
-		DeltaRes_Rtd = Res_RTD - 1000; //subtract 1k for 0 deg reference
-		calculatedTemperature = DeltaRes_Rtd /3.85f;
+		DeltaRes_Rtd = Res_RTD - 1000; //subtract 1k for 0 deg reference  change to 100 for 100 ohm rtd
+		calculatedTemperature = DeltaRes_Rtd /3.85f;//change to .385 for 100 ohm rtd
 		//now we can calculate the resistance of the rtd by     ((3.3-rtdvold)/RtdVolt)*2K
 		
 		//now process the Battery data

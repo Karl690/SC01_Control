@@ -82,9 +82,9 @@ void ui_control_refresh() {
 	sprintf(ui_temp_string, "%.1f'C", pcnt_info.temperature);
 	lv_label_set_text(ui_control.temp, ui_temp_string);//pcnt_info.temperature
 
-	int CalcDuty = pcnt_info.duty * 6;
+	int CalcDuty = ((pcnt_info.duty*32 )/ 32);
 	if (CalcDuty > 100) CalcDuty = 100;
-	sprintf(ui_temp_string, "%d%c", CalcDuty, '%');
+	sprintf(ui_temp_string, "%d", CalcDuty);
 	lv_label_set_text(ui_control.duty, ui_temp_string);
 
 	lv_label_set_text_fmt(ui_control.raw_cnt1, "%d", pcnt_info.count01);
