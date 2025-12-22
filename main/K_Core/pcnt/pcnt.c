@@ -11,9 +11,10 @@ PCNT_INFO pcnt_info = { 0, 0, 0, 0, 0, 0 };
 #define MAX_TEMP                        0x7fff  // max positive
 //#define ADC_NUM_SAMPLES                 10  // 10 values saved; toss high and low to get average
 //#define ADC_SHIFT_FOR_AVG               3
-int16_t     RTDsampleHistory[ADC_NUM_SAMPLES+1]; // last N reads from ADC
-int16_t     BatterysampleHistory[ADC_NUM_SAMPLES]; // last N reads from ADC
+int16_t     RTDsampleHistory[ADC_NUM_SAMPLES+4]; // last N reads from ADC
+int16_t     BatterysampleHistory[ADC_NUM_SAMPLES+4]; // last N reads from ADC
 int16_t SmoothSampleIndex = 0;
+int16_t testvalue = 0;
 
 pcnt_unit_handle_t PulseCounter_1 = NULL;
 pcnt_unit_handle_t PulseCounter_2 = NULL;
@@ -146,13 +147,13 @@ void Calculate_Heater_DutyCycle() {
 		}
 		if (mode == 2)
 		{
-			//heating mode
+			//c00ling mode
 			float deltaTemp = pcnt_info.temperature-systemconfig.pcnt.programmed_temperature;
-			deltaTemp += 5;
+			//deltaTemp += 5;
 			if (deltaTemp < 0)pcnt_info.duty = 0;
 			else
 			{
-			pcnt_info.duty = (int)deltaTemp * 3;	
+				pcnt_info.duty = 100;// (int)deltaTemp * 50;	
 			}
 			return;
 		}
@@ -223,13 +224,20 @@ float convertRtdDataFromRawADCValue(const PcntTableStruct* adcTable, float RTD_V
 void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 {
 	float rtd_count = 0;
+	float battery_Count = 0;
 	float deltaRtdVolt = 0;
 	float Res_RTD = 1000;
 	float DeltaRes_Rtd = 0;//zero degrees default should be 1k-1k
 	float calculatedTemperature = 0;
+
 	RTDsampleHistory[SmoothSampleIndex] = (RawValueRTD + RTDsampleHistory[SmoothSampleIndex]) / 2;
 	BatterysampleHistory[SmoothSampleIndex] = (RawValueBattery + BatterysampleHistory[SmoothSampleIndex]) / 2;
+	if (SmoothSampleIndex == 0)
+	{
+		testvalue++;
+	}
 	SmoothSampleIndex++;
+
 	if (SmoothSampleIndex >= ADC_NUM_SAMPLES)
 	{
 		SmoothSampleIndex = 0; 
@@ -258,7 +266,7 @@ void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 		RTDsampleHistory[ADC_NUM_SAMPLES] = (int16_t)rtd_count;//save for diagnosit display
 		//rtd_count=(rtd_count*25.0f)/33.0f;
 		//next we will shift by n to effect a divide by 2^n to get the average of the 2^n remaining samples
-		RtdVoltage = (float)(rtd_count / 3218); //systemconfig.pcnt.rtd_scale;
+		RtdVoltage = (float)(rtd_count / 2410);//3218); //systemconfig.pcnt.rtd_scale;
 		pcnt_info.rtd_volt = RtdVoltage; //update global
 		deltaRtdVolt = 3.3f - RtdVoltage;
 		Res_RTD = 2000*(RtdVoltage / deltaRtdVolt); //now we should have the resistance in ohms
@@ -281,7 +289,9 @@ void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 		sum -= (low + high); // sum is now the total of the middle N values
 		//at this point we have the smoothed Raw battery number
 		//next we will shift by n to effect a divide by 2^n to get the average of the 2^n remaining samples
-		BatteryVoltage = (float)((float)(sum >> ADC_SHIFT_FOR_AVG) / 1600); //systemconfig.pcnt.rtd_scale;
+		battery_Count = (float)((float)(sum >> ADC_SHIFT_FOR_AVG)); //systemconfig.pcnt.rtd_scale;
+		BatterysampleHistory[ADC_NUM_SAMPLES] = (int16_t)battery_Count; //save for diagnosit display
+		BatteryVoltage = (float)(rtd_count / 241);
 		pcnt_info.bat_volt = BatteryVoltage; //update global
 		
 		Temperature = calculatedTemperature;//convertRtdDataFromRawADCValue(RtdTable_1K, ((uint16_t)rtd_count)); //*systemconfig.pcnt.rtd_scale)); //use lookup table to convert voltage to temperature
@@ -310,22 +320,22 @@ void Read_Counters() {
 	{Battery_V_Freq = pcnt_info.count02 - 1000; }
 	
 	//battery voltage next
-	BatteryVoltage = (float)((float)Battery_V_Freq / 845); //systemconfig.pcnt.battery_scale;
-	pcnt_info.bat_volt = BatteryVoltage; //update global variable
-	if (BatteryVoltage > 7.182){bat_percent = 100; }
-	else if(BatteryVoltage > 7.182f)	{bat_percent = 100; }
-	else if(BatteryVoltage > 6.591f)	{bat_percent = 90; }
-	else if(BatteryVoltage > 6.335f)	{bat_percent = 80; }
-	else if(BatteryVoltage > 6.25f)		{bat_percent = 70; }
-	else if(BatteryVoltage > 6.20f)		{bat_percent = 60; }
-	else if(BatteryVoltage > 6.15f)		{bat_percent = 50; }
-	else if(BatteryVoltage > 6.125f)	{bat_percent = 40; }
-	else if(BatteryVoltage > 6.1f)		{bat_percent = 30; }
-	else if(BatteryVoltage > 6.084f)	{bat_percent = 20; }
-	else if(BatteryVoltage > 5.493f)	{bat_percent = 10; }
-	else {bat_percent = 0; }
+	//BatteryVoltage = (float)((float)Battery_V_Freq / 245); //systemconfig.pcnt.battery_scale;
+	//pcnt_info.bat_volt = BatteryVoltage; //update global variable
+//	if (BatteryVoltage > 7.182){bat_percent = 100; }
+//	else if(BatteryVoltage > 7.182f)	{bat_percent = 100; }
+//	else if(BatteryVoltage > 6.591f)	{bat_percent = 90; }
+//	else if(BatteryVoltage > 6.335f)	{bat_percent = 80; }
+//	else if(BatteryVoltage > 6.25f)		{bat_percent = 70; }
+//	else if(BatteryVoltage > 6.20f)		{bat_percent = 60; }
+//	else if(BatteryVoltage > 6.15f)		{bat_percent = 50; }
+//	else if(BatteryVoltage > 6.125f)	{bat_percent = 40; }
+//	else if(BatteryVoltage > 6.1f)		{bat_percent = 30; }
+//	else if(BatteryVoltage > 6.084f)	{bat_percent = 20; }
+//	else if(BatteryVoltage > 5.493f)	{bat_percent = 10; }
+//	else {bat_percent = 0; }
 
-	pcnt_info.bat_percent = bat_percent;//update global variable
+//	pcnt_info.bat_percent = bat_percent;//update global variable
 	//adjust the temperature next
 	if (pcnt_info.count01 < 1000)//adjust for 0 volt freq offset of 1000
 	{TemperatureFreq = 0; }

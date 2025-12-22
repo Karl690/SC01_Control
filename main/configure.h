@@ -70,7 +70,7 @@ typedef struct
 	uint8_t pcnt_pin_02;
 	uint8_t enabled;
 	uint8_t ctrl_pin;
-	uint16_t programmed_temperature;
+	int programmed_temperature;
 	float temp_scale;
 	float battery_scale;
 	float rtd_scale;

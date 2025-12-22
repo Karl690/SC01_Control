@@ -35,8 +35,11 @@ void ui_control_button_handler(lv_event_t * e) {
 		break;
 	}
 	
-	if (temp < 0) temp = 0;
-	else if (temp > 300) temp = 300;
+	if (temp < -20) temp = -20;
+	else if (temp > 200) 
+	{
+		temp = 200;
+	}
 	systemconfig.pcnt.programmed_temperature = temp;
 	refreshRequest = true;
 
@@ -92,7 +95,7 @@ void ui_control_refresh() {
 
 //	float bat_percent = (pcnt_info.bat_volt - PCNT_BATTERY_EMPTY) / (PCNT_BATTERY_FULL - PCNT_BATTERY_EMPTY) * 100;
 //	if (bat_percent < 0) bat_percent = 0;
-	sprintf(ui_temp_string, "%.1f%c", bat_percent, '%');
+	sprintf(ui_temp_string, "%.2f%c", pcnt_info.bat_volt, 'V');
 	lv_label_set_text(ui_control.battery, ui_temp_string);
 	int bat_level = 10 - ceil(bat_percent / 10);
 	lv_obj_t* obj;

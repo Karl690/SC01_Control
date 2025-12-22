@@ -33,12 +33,12 @@ typedef struct {
 	int16_t      value; // if temperature (s10.5 format - 1/32 degree) at specified adcValue; position, just value, etc
 } PcntTableStruct;
 
-
+extern int16_t SmoothSampleIndex;
 extern PCNT_INFO pcnt_info;
 extern int PwmTimerReloadRegister;
 extern float bat_percent;
-extern int16_t     RTDsampleHistory[ADC_NUM_SAMPLES+1]; // last N reads from ADC
-extern int16_t     BatterysampleHistory[ADC_NUM_SAMPLES]; // last N reads from ADC
+extern int16_t     RTDsampleHistory[ADC_NUM_SAMPLES+4]; // last N reads from ADC
+extern int16_t     BatterysampleHistory[ADC_NUM_SAMPLES+4]; // last N reads from ADC
 void pcnt_init(void);
 void EnableCounter();
 void DisableCounter();
