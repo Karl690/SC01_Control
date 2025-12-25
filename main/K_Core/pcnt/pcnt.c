@@ -11,16 +11,16 @@ PCNT_INFO pcnt_info = { 0, 0, 0, 0, 0, 0 };
 #define MAX_TEMP                        0x7fff  // max positive
 //#define ADC_NUM_SAMPLES                 10  // 10 values saved; toss high and low to get average
 //#define ADC_SHIFT_FOR_AVG               3
-int16_t     RTDsampleHistory[ADC_NUM_SAMPLES+4]; // last N reads from ADC
-int16_t     BatterysampleHistory[ADC_NUM_SAMPLES+4]; // last N reads from ADC
-int16_t SmoothSampleIndex = 0;
-int16_t testvalue = 0;
+uint16_t     RTDsampleHistory[ADC_NUM_SAMPLES + 4]; // last N reads from ADC
+uint16_t     BatterysampleHistory[ADC_NUM_SAMPLES + 4]; // last N reads from ADC
+uint16_t SmoothSampleIndex = 0;
+uint16_t testvalue = 0;
 
 pcnt_unit_handle_t PulseCounter_1 = NULL;
 pcnt_unit_handle_t PulseCounter_2 = NULL;
 int PwmTimerReloadRegister = 0;
-int TemperatureFreq;
-int Battery_V_Freq;
+uint16_t TemperatureFreq;
+uint16_t Battery_V_Freq;
 float RtdVoltage;
 float Temperature;
 float BatteryVoltage;
@@ -91,7 +91,7 @@ void pcnt_init(void) {
 	ESP_ERROR_CHECK(pcnt_channel_set_edge_action(chan1, PCNT_CHANNEL_EDGE_ACTION_INCREASE, PCNT_CHANNEL_EDGE_ACTION_HOLD));
 	ESP_ERROR_CHECK(pcnt_channel_set_level_action(chan1, PCNT_CHANNEL_LEVEL_ACTION_KEEP, PCNT_CHANNEL_LEVEL_ACTION_KEEP));
 
-	pcnt_glitch_filter_config_t filter_config = { .max_glitch_ns = 100 }; //set it to 100ns as we are using 1mhz input pulse
+	pcnt_glitch_filter_config_t filter_config = { .max_glitch_ns = 200 }; //set it to 100ns as we are using 1mhz input pulse
 	ESP_ERROR_CHECK(pcnt_unit_set_glitch_filter(PulseCounter_1, &filter_config));
 	ESP_ERROR_CHECK(pcnt_unit_set_glitch_filter(PulseCounter_2, &filter_config));
 
@@ -221,7 +221,7 @@ float convertRtdDataFromRawADCValue(const PcntTableStruct* adcTable, float RTD_V
 	return conversionValue;
 }
 
-void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
+void SmoothDataUsingOlympicVotingAverage(uint16_t RawValueRTD, uint16_t RawValueBattery)
 {
 	float rtd_count = 0;
 	float battery_Count = 0;
@@ -229,7 +229,7 @@ void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 	float Res_RTD = 1000;
 	float DeltaRes_Rtd = 0;//zero degrees default should be 1k-1k
 	float calculatedTemperature = 0;
-
+//store the average of the readings in 10x array
 	RTDsampleHistory[SmoothSampleIndex] = (RawValueRTD + RTDsampleHistory[SmoothSampleIndex]) / 2;
 	BatterysampleHistory[SmoothSampleIndex] = (RawValueBattery + BatterysampleHistory[SmoothSampleIndex]) / 2;
 	if (SmoothSampleIndex == 0)
@@ -252,21 +252,19 @@ void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 		// subtract the high and low from the sum and then calculate the average of the remaining sum.
 		int32_t sum, raw, low, high, i;
 		low = 0x7fffffff; // MAXINT
-		high = 0x80000000; // MININT
+		high = 0; // MININT
 		sum = 0;
 		for (i = 0; i < ADC_NUM_SAMPLES; i++)
 		{
-			raw = RTDsampleHistory[i];
+			raw = (int32_t)RTDsampleHistory[i] ;
 			sum += raw; // keep running total
 			if (raw < low) low = raw; // update the lowest reading
 			if (raw > high)high = raw; // update the highest reading
 		}
 		sum -= (low + high); // sum is now the total of the middle N values
 		rtd_count = (float)(sum >> ADC_SHIFT_FOR_AVG);//now we have aa scaled value, but it is 2.5v full scale, not 3.3
-		RTDsampleHistory[ADC_NUM_SAMPLES] = (int16_t)rtd_count;//save for diagnosit display
-		//rtd_count=(rtd_count*25.0f)/33.0f;
-		//next we will shift by n to effect a divide by 2^n to get the average of the 2^n remaining samples
-		RtdVoltage = (float)(rtd_count / 2410);//3218); //systemconfig.pcnt.rtd_scale;
+//		RTDsampleHistory[10] = (int16_t)rtd_count;//save for diagnosit display
+		RtdVoltage = (float)(rtd_count / 2435);//3218); //systemconfig.pcnt.rtd_scale;
 		pcnt_info.rtd_volt = RtdVoltage; //update global
 		deltaRtdVolt = 3.3f - RtdVoltage;
 		Res_RTD = 2000*(RtdVoltage / deltaRtdVolt); //now we should have the resistance in ohms
@@ -277,11 +275,11 @@ void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 		//now process the Battery data
 
 		low = 0x7fffffff; // MAXINT
-		high = 0x80000000; // MININT
+		high = 0; // MININT
 		sum = 0;
 		for (i = 0; i < ADC_NUM_SAMPLES; i++)
 		{
-			raw = BatterysampleHistory[i];
+			raw = (int32_t) BatterysampleHistory[i];
 			sum += raw; // keep running total
 			if (raw < low) low = raw; // update the lowest reading
 			if (raw > high)high = raw; // update the highest reading
@@ -290,10 +288,11 @@ void SmoothDataUsingOlympicVotingAverage(int RawValueRTD,int RawValueBattery)
 		//at this point we have the smoothed Raw battery number
 		//next we will shift by n to effect a divide by 2^n to get the average of the 2^n remaining samples
 		battery_Count = (float)((float)(sum >> ADC_SHIFT_FOR_AVG)); //systemconfig.pcnt.rtd_scale;
-		BatterysampleHistory[ADC_NUM_SAMPLES] = (int16_t)battery_Count; //save for diagnosit display
-		BatteryVoltage = (float)(rtd_count / 241);
-		pcnt_info.bat_volt = BatteryVoltage; //update global
+//		BatterysampleHistory[10] = (int16_t)battery_Count; //save for diagnosit display
+		BatteryVoltage = (float)(battery_Count / 285);
 		
+		pcnt_info.bat_volt = BatteryVoltage; //update global
+		//BatterysampleHistory[3] = 666;
 		Temperature = calculatedTemperature;//convertRtdDataFromRawADCValue(RtdTable_1K, ((uint16_t)rtd_count)); //*systemconfig.pcnt.rtd_scale)); //use lookup table to convert voltage to temperature
 		pcnt_info.temperature = Temperature;
 		
@@ -317,7 +316,7 @@ void Read_Counters() {
 	if (pcnt_info.count02 < 1000)//adjust for 0 volt freq offset of 1000
 	{Battery_V_Freq = 0; }
 	else
-	{Battery_V_Freq = pcnt_info.count02 - 1000; }
+	{Battery_V_Freq =(uint16_t) pcnt_info.count02 - 1000; }
 	
 	//battery voltage next
 	//BatteryVoltage = (float)((float)Battery_V_Freq / 245); //systemconfig.pcnt.battery_scale;
@@ -340,7 +339,7 @@ void Read_Counters() {
 	if (pcnt_info.count01 < 1000)//adjust for 0 volt freq offset of 1000
 	{TemperatureFreq = 0; }
 	else
-	{TemperatureFreq = pcnt_info.count01 - 1000; }
+	{TemperatureFreq = (uint16_t) pcnt_info.count01 - 1000; }
 	SmoothDataUsingOlympicVotingAverage(TemperatureFreq, Battery_V_Freq);
 	// next we can apply the scaling logic to the net count
 	//the V/F internal reference is 2.5V so 2.5V should have 90% 
