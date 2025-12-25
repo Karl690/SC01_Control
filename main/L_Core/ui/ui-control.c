@@ -97,15 +97,33 @@ void ui_control_refresh() {
 //	if (bat_percent < 0) bat_percent = 0;
 	sprintf(ui_temp_string, "%.2f%c", pcnt_info.bat_volt, 'V');
 	lv_label_set_text(ui_control.battery, ui_temp_string);
-	int bat_level = 10 - ceil(bat_percent / 10);
-	lv_obj_t* obj;
-	for(int i = 9; i >= 0; i --) {
-		obj = lv_obj_get_child(ui_control.battery_panel, i);
-		if (i < bat_level) {
-			lv_obj_set_style_bg_color(obj, lv_color_hex(0x444444), LV_PART_MAIN);
-		} else {
+	lv_obj_t* obj;//working graphic object, aka Battery BAR
+	int bat_level = (8.4f - pcnt_info.bat_volt);// 10 - ceil(bat_percent / 10);
+	if (bat_level < 0)
+	{//above 90% so turnALL on
+		for (int i = 9; i >= 0; i--) 
+		{
+			obj = lv_obj_get_child(ui_control.battery_panel, i); 
 			lv_obj_set_style_bg_color(obj, lv_color_hex(0x00ff24), LV_PART_MAIN);
 		}
+		return;
+	}
+	if (bat_level > 1)
+	{//below 10% so turn ALL off
+		for (int i = 9; i >= 0; i--) 
+		{
+			obj = lv_obj_get_child(ui_control.battery_panel, i); 
+			lv_obj_set_style_bg_color(obj, lv_color_hex(0x444444), LV_PART_MAIN); 
+		}
+		return;
+	}
+	bat_level = (int)((8.4f - pcnt_info.bat_volt) * 10.0f); //scale up to 10 incremental values
+	for(int i = 9; i >= 0; i --) {
+		obj = lv_obj_get_child(ui_control.battery_panel, i);
+		if (i < bat_level) 
+		{	lv_obj_set_style_bg_color(obj, lv_color_hex(0x444444), LV_PART_MAIN);	} 
+		else 
+		{	lv_obj_set_style_bg_color(obj, lv_color_hex(0x00ff24), LV_PART_MAIN);	}
 	}
 }
 

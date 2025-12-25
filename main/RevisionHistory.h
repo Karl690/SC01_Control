@@ -2,7 +2,7 @@
 
 #define SYSTEMINFO "SC01_Control"
 #define RevisionHeader ">Hy:L_Core:"
-#define MajorStep      "1.24"
+#define MajorStep      "1.25"
 #define RevisionDate   "12/25/2025"
 #define SYSTEMVERSION  MajorStep " " RevisionDate
 #define CONTROLLABEL   "HYREL "MajorStep
