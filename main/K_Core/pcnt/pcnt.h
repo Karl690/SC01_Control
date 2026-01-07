@@ -37,6 +37,7 @@ extern uint16_t SmoothSampleIndex;
 extern PCNT_INFO pcnt_info;
 extern int PwmTimerReloadRegister;
 extern float bat_percent;
+extern float Kfactor;
 extern uint16_t     RTDsampleHistory[ADC_NUM_SAMPLES + 4]; // last N reads from ADC
 extern uint16_t     BatterysampleHistory[ADC_NUM_SAMPLES + 4]; // last N reads from ADC
 void pcnt_init(void);

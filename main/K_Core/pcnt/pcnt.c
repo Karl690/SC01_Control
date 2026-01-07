@@ -15,6 +15,7 @@ uint16_t     RTDsampleHistory[ADC_NUM_SAMPLES + 4]; // last N reads from ADC
 uint16_t     BatterysampleHistory[ADC_NUM_SAMPLES + 4]; // last N reads from ADC
 uint16_t SmoothSampleIndex = 0;
 uint16_t testvalue = 0;
+float Kfactor = 0.5f;
 
 pcnt_unit_handle_t PulseCounter_1 = NULL;
 pcnt_unit_handle_t PulseCounter_2 = NULL;
@@ -127,21 +128,26 @@ void Calculate_Heater_DutyCycle() {
 //	if (pcnt_info.duty > 16)pcnt_info.duty = 0;
 //	return;
 	int mode = systemconfig.mode.option;//heat or chill mode
-	
+	float TargetTemperature = systemconfig.pcnt.programmed_temperature;
 	if (systemconfig.pcnt.enabled)
 	{
 		if (mode == 1)
 		{//heating mode
-		float deltaTemp = (systemconfig.pcnt.programmed_temperature+1) - pcnt_info.temperature;
+			float deltaTemp = TargetTemperature - pcnt_info.temperature;
 			if (deltaTemp < 0)
-			{
+			{//to hot kill the duty
+				if (Kfactor > 0.1)Kfactor -= 0.002f;//scale Kfactor automatically
 				deltaTemp = 0;
 				pcnt_info.duty = 0;
 				return;
 			}
 			else
-			{				
-				pcnt_info.duty = (int)deltaTemp * 5;
+			{	//still not at temperature			
+				pcnt_info.duty = ((int)deltaTemp * 5) + TargetTemperature*Kfactor;
+				if (deltaTemp > 0.5f)
+				{
+					if(Kfactor<1)Kfactor += 0.002f;
+				}
 			}
 		return;
 		}

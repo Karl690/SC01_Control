@@ -12,8 +12,8 @@ idf_component_register(
                 	L_Core/sd-card/sd-card.c
                 	L_Core/pct/pct.c
                 	L_Core/ui/ui.c
-                    L_Core/ui/ui-secs.c
-                    L_Core/ui/ui-simple.c
+                	L_Core/ui/ui-secs.c
+                	L_Core/ui/ui-simple.c
                 	L_Core/ui/ui_helpers.c
                 	L_Core/ui/ui-splash.c
                 	L_Core/ui/ui-sdcard.c
@@ -22,11 +22,11 @@ idf_component_register(
                 	L_Core/ui/ui-bluetooth.c
                 	L_Core/ui/ui-control.c
                 	L_Core/ui/ui-pct.c
-                    L_Core/ui/ui-pct01.c
-                    L_Core/ui/ui-wifi.c
+                	L_Core/ui/ui-pct01.c
+                	L_Core/ui/ui-wifi.c
                 	L_Core/ui/ui-comm.c
-                    L_Core/ui/ui-plot.c
-					L_Core/ui/ui-variables.c
+                	L_Core/ui/ui-plot.c
+                	L_Core/ui/ui-variables.c
                 	L_Core/ui/images/btn_about.c
                 	L_Core/ui/images/copyright.c
                 	L_Core/ui/images/btnhome_01.c
@@ -36,26 +36,26 @@ idf_component_register(
                 	L_Core/ui/images/btnhome_06.c
                 	L_Core/ui/images/folder.c
                 	L_Core/ui/images/pct.c
-                    L_Core/ui/images/wifi.c
-                    L_Core/ui/images/meg.c
-                    L_Core/ui/images/secs.c
-                    L_Core/ui/images/simple.c
+                	L_Core/ui/images/wifi.c
+                	L_Core/ui/images/meg.c
+                	L_Core/ui/images/secs.c
+                	L_Core/ui/images/simple.c
                 	L_Core/ui/images/bluetooth.c
                 	L_Core/ui/images/settings.c
                 	L_Core/ui/images/variables.c
                 	L_Core/ui/images/btnhome_05.c
-					L_Core/ui/images/btnhome_06.c
+                	L_Core/ui/images/btnhome_06.c
                 	L_Core/ui/images/btnhome_07.c
                 	L_Core/ui/images/btnhome_08.c
                 	L_Core/ui/images/controllers.c
                 	L_Core/ui/images/fan.c
                 	L_Core/ui/images/heater.c
                 	L_Core/ui/images/mtr.c
-                    L_Core/ui/images/plot.c
-                    L_Core/ui/images/secs.c
-					L_Core/ui/images/logo.c
-					L_Core/ui/images/hyrel_logo.c
-					L_Core/ui/images/hyrel3d_logo.c
+                	L_Core/ui/images/plot.c
+                	L_Core/ui/images/secs.c
+                	L_Core/ui/images/logo.c
+                	L_Core/ui/images/hyrel_logo.c
+                	L_Core/ui/images/hyrel3d_logo.c
                 	L_Core/ui/font/en_12.c
                 	L_Core/ui/font/en_16.c
                 	L_Core/ui/font/en_bold_16.c
@@ -80,18 +80,19 @@ idf_component_register(
                 	K_Core/taskmanager.c
                 	K_Core/display/DisplayList.c
                 	K_Core/serial/serial.c
-                    K_Core/secs/secs.c
-                    K_Core/secs/secshelper.c
+                	K_Core/secs/secs.c
+                	K_Core/secs/secshelper.c
                 	K_Core/simple/simple.c
-                    K_Core/adc/adc.c
+                	K_Core/adc/adc.c
                 	K_Core/adc/adc-table.c
                 	K_Core/communication/communication.c
                 	K_Core/communication/parser.c
-					K_Core/execution/sequencer.c
+                	K_Core/execution/sequencer.c
                 	K_Core/execution/cmdprocessor.c
-					K_Core/execution/M_Codes.c
+                	K_Core/execution/M_Codes.c
                 	K_Core/amplifier/amplifier.c
-					K_Core/pcnt/pcnt.c
+                	K_Core/pcnt/pcnt.c
+                	K_Core/Pid.c
                 INCLUDE_DIRS "."
                 REQUIRES
                 	LovyanGFX

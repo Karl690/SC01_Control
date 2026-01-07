@@ -62,9 +62,12 @@ void adc_smoothDataUsing_olympic_votingaverage(void)
 	adcStruct* ADC_Work_Channel = &ADC_Channel[ADC_Work_Channel_Index];
 	//ADC_Work_Channel->adcRaw = RawADCDataBuffer[ADC_Work_Channel_Index]; //update last reading
 	//now we need to plug into the 10 reading buffer for smoothing.
-	ADC_Work_Channel->sampleIndex++; //point to next place to enter the data in smoothing array
-	if (ADC_Work_Channel->sampleIndex > 9) ADC_Work_Channel->sampleIndex = 0; //limit to 10 entries
 	ADC_Work_Channel->sampleHistory[ADC_Work_Channel->sampleIndex] = ADC_Work_Channel->adcRaw; //plug in the latest reading.
+
+	ADC_Work_Channel->sampleIndex++; //point to next place to enter the data in smoothing array
+	if (ADC_Work_Channel->sampleIndex < 10)return;//come back later for next sample
+	//if you get here, it means we have 10 samples, so now we can apply the olympic voting smoothing.
+	ADC_Work_Channel->sampleIndex = 0; //reset sample pointer for next cycle
 	//at this point, channel.sampleHistory has the raw data to be smoothed.
 
 	{
