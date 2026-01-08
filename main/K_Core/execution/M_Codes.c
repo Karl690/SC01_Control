@@ -1,6 +1,7 @@
 #include "M_Codes.h"
 #include "sequencer.h"
 #include "L_Core/ui/ui-simple.h"
+#include "K_Core/taskmanager.h"
 
 
 void M_Code_M104(void) 
@@ -47,6 +48,7 @@ void M_Code_M104(void)
 		systemconfig.pcnt.programmed_temperature = (uint16_t)ARG_S;
 		systemconfig.pcnt.enabled = true;
 		refreshRequest = true;
+		HeartBeat = 0;
 		return;
 	}
 	systemconfig.pcnt.enabled = false;

@@ -8,6 +8,7 @@
 #include "K_Core/communication/communication.h"
 #include "L_Core/ui/ui-simple.h"
 #include "RevisionHistory.h"
+#include "ui-plot.h"
 lv_obj_t* ui_control_screen;
 UI_CONTROL ui_control;
 void ui_control_send_ble_command(CONTROLS_BUTTON_LIST buttonId) 
@@ -31,6 +32,12 @@ void ui_control_button_handler(lv_event_t * e) {
 		break;
 	case BTN_TEMP_ONOFF:
 		systemconfig.pcnt.enabled = systemconfig.pcnt.enabled == 1 ? 0 : 1;
+		if (systemconfig.pcnt.enabled)
+		{
+			HeartBeat = 0; //rest temp plot to zero time
+			ui_plot_info.max_y = 300;
+			ui_plot_info.step_yn = ((ui_plot_info.max_y - ui_plot_info.min_y) / 50) * 10;
+		}
 		//ui_control_send_ble_command(BTN_TEMP_ONOFF);
 		break;
 	}
@@ -74,7 +81,7 @@ void ui_control_button_handler(lv_event_t * e) {
 
 void ui_control_refresh() {
 
-	lv_label_set_text_fmt(ui_control.hb, "HB: %d", HeartBeat);
+	lv_label_set_text_fmt(ui_control.hb, "HB: %ld", HeartBeat);
 
 	ui_change_button_color(ui_control.onoff, systemconfig.pcnt.enabled == 1? 0x00ff00 : 0xff0000, 0xffffff);
 	ui_change_button_text(ui_control.onoff, systemconfig.pcnt.enabled? "ON": "OFF");

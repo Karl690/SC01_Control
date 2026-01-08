@@ -53,13 +53,15 @@ typedef struct
 	lv_obj_t* canvas_label_y[6];
 } UI_PLOT_OBJ;
 extern lv_obj_t *ui_plot_screen;
-
+extern uint16_t ui_plot_scan_points[UI_PLOT_CHANNEL_NUM][UI_PLOT_MAX_POINTS];
+extern UI_PLOT_INFO ui_plot_info;
+extern UI_PLOT_OBJ ui_plot_obj;
 void ui_plot_screen_init(void);
 void ui_plot_update();
 void ui_plot_clear();
 void ui_plot_axis(lv_obj_t* parent, bool is_label);
 void ui_plot_button_status(bool turning);
-
+lv_point_t ui_plot_val2pos(lv_point_t val);
 void ui_plot_analyze();
 void ui_plot_peaks();
 void ui_plot_APPLY_SendFreqTo407();

@@ -53,6 +53,7 @@ extern "C" void app_main(void)
 	InitLCDAndLVGL();
 	InitUI();
 	vTaskDelay(500);//kill a little time before launching K core	
+	//ui_plot_info.max_y = 300;
 	K_Core_Main();
 	processSaveToSDCard("SC01 Initialized");
 	IsInitialized = true;

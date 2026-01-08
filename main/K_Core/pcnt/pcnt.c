@@ -1,6 +1,8 @@
 #include <driver/pulse_cnt.h>
 #include <driver/gpio.h>
 #include "pcnt.h"
+#include "L_Core/ui/ui-plot.h"
+#include "K_Core/taskmanager.h"
 
 PCNT_INFO pcnt_info = { 0, 0, 0, 0, 0, 0 };
 
@@ -127,6 +129,15 @@ void Calculate_Heater_DutyCycle() {
 //	pcnt_info.duty++; //change by 1 each second
 //	if (pcnt_info.duty > 16)pcnt_info.duty = 0;
 //	return;
+	lv_point_t value, pos;
+	lv_draw_arc_dsc_t arc_dsc;
+	lv_draw_arc_dsc_init(&arc_dsc);
+	
+	arc_dsc.width = 1; // Set the width of the arc line
+	
+	int xoffset = (HeartBeat & 0x03ff);//
+	//xoffset += ui_plot_info.min_x;
+	
 	int mode = systemconfig.mode.option;//heat or chill mode
 	float TargetTemperature = systemconfig.pcnt.programmed_temperature;
 	if (systemconfig.pcnt.enabled)
@@ -139,7 +150,6 @@ void Calculate_Heater_DutyCycle() {
 				if (Kfactor > 0.1)Kfactor -= 0.002f;//scale Kfactor automatically
 				deltaTemp = 0;
 				pcnt_info.duty = 0;
-				return;
 			}
 			else
 			{	//still not at temperature			
@@ -149,7 +159,39 @@ void Calculate_Heater_DutyCycle() {
 					if(Kfactor<1)Kfactor += 0.002f;
 				}
 			}
-		return;
+//			ui_plot_scan_points[0][xoffset] = (uint16_t) TargetTemperature;
+//			ui_plot_scan_points[1][xoffset] = (uint16_t) pcnt_info.temperature;
+//			ui_plot_scan_points[2][xoffset] = (uint16_t) pcnt_info.duty;
+//			ui_plot_scan_points[3][xoffset] = (uint16_t) Kfactor * 100;
+
+//			value.x = xoffset;
+//			value.y = (uint16_t) TargetTemperature;
+//			if (value.x >= ui_plot_info.min_x && value.x < ui_plot_info.min_x + UI_PLOT_MAX_POINTS)
+//			{
+//				ui_plot_scan_points[0][value.x - ui_plot_info.min_x] =  value.y;	
+//			}
+//			value.y = (uint16_t) TargetTemperature;
+//			pos = ui_plot_val2pos(value);
+//			arc_dsc.color = lv_color_hex(UI_PLOT_COLOR_CH0);
+//			lv_canvas_draw_arc(ui_plot_obj.canvas, pos.x, pos.y, 2, 0, 360, &arc_dsc);
+//			
+//			value.y = (uint16_t) pcnt_info.temperature;
+//			pos = ui_plot_val2pos(value);
+//			arc_dsc.color = lv_color_hex(UI_PLOT_COLOR_CH1);
+//			lv_canvas_draw_arc(ui_plot_obj.canvas, pos.x, pos.y, 2, 0, 360, &arc_dsc);
+//			
+//			value.y = (uint16_t) pcnt_info.duty;
+//			pos = ui_plot_val2pos(value);
+//			arc_dsc.color = lv_color_hex(UI_PLOT_COLOR_CH2);
+//			lv_canvas_draw_arc(ui_plot_obj.canvas, pos.x, pos.y, 2, 0, 360, &arc_dsc);
+//			
+//			value.y = (uint16_t) Kfactor * 100;
+//			pos = ui_plot_val2pos(value);
+//			arc_dsc.color = lv_color_hex(UI_PLOT_COLOR_CH3);
+//			lv_canvas_draw_arc(ui_plot_obj.canvas, pos.x, pos.y, 2, 0, 360, &arc_dsc);
+//			
+
+			//return;
 		}
 		if (mode == 2)
 		{
@@ -161,11 +203,16 @@ void Calculate_Heater_DutyCycle() {
 			{
 				pcnt_info.duty = 100;// (int)deltaTemp * 50;	
 			}
-			return;
+
 		}
-		
+		ui_plot_scan_points[0][xoffset] = (uint16_t) TargetTemperature;
+		ui_plot_scan_points[1][xoffset] = (uint16_t) pcnt_info.temperature;
+		ui_plot_scan_points[2][xoffset] = (uint16_t) pcnt_info.duty;
+		ui_plot_scan_points[3][xoffset] = (uint16_t) Kfactor * 100;
+		return;//only plot is enabled
 	}
-	pcnt_info.duty = 0;
+
+	pcnt_info.duty = 0;//not enabled so turn off
 }
 
 void SetPwmOutput()

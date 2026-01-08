@@ -6,6 +6,7 @@
 #include "K_Core/serial/serial.h"
 #include "K_Core/execution/cmdprocessor.h"
 #include "L_Core/bluetooth/ble.h"
+#include "K_Core/taskmanager.h"
 
 lv_obj_t* ui_plot_screen;
 lv_obj_t* ui_plot_canvas;
@@ -26,8 +27,8 @@ uint32_t ui_plot_channel_color[UI_PLOT_CHANNEL_NUM] = {
 };
 
 UI_PLOT_INFO ui_plot_info = {
-	.min_x = 9000,
-	.max_x = 10000,
+	.min_x = 0,
+	.max_x = 1000,
 	.min_y = 0,
 	.max_y = 1000,
 	.step_xn = 200,
@@ -40,6 +41,8 @@ void ui_plot_clear()
 	memset(ui_plot_scan_points, 0, sizeof(uint16_t)*UI_PLOT_CHANNEL_NUM * UI_PLOT_MAX_POINTS);
 	memset(ui_plot_info.channel_peaks, 0, sizeof(lv_point_t) * UI_PLOT_CHANNEL_NUM);
 	ui_plot_axis(ui_plot_panel, false);
+	HeartBeat=0; //
+	
 }
 
 void ui_plot_zoom(bool inout)
@@ -52,9 +55,9 @@ void ui_plot_zoom(bool inout)
 	}
 	else // zoom out
 	{
-		if (ui_plot_info.max_y - 100 > 500)
+		if (ui_plot_info.max_y - 100 > 50)
 		{
-			ui_plot_info.max_y -= 100;
+			ui_plot_info.max_y -= 50;
 			ui_plot_info.step_yn = ((ui_plot_info.max_y - ui_plot_info.min_y) / 50) * 10;
 		}
 	}
@@ -162,7 +165,7 @@ void ui_plot_update_timer(lv_timer_t * timer)
 	lv_draw_arc_dsc_t arc_dsc;
 	lv_draw_arc_dsc_init(&arc_dsc);
 	
-	arc_dsc.width = 3; // Set the width of the arc line
+	arc_dsc.width = 1; // Set the width of the arc line
 	for (int i = 0; i < 10; i++)
 	{
 		if (cmd_report_head == cmd_report_tail) break;
@@ -175,18 +178,19 @@ void ui_plot_update_timer(lv_timer_t * timer)
 			{
 				ui_plot_scan_points[info->chanel][value.x - ui_plot_info.min_x] =  value.y;	
 			}
-			if (ui_plot_info.channel_visible[info->chanel])
-			{
-				pos = ui_plot_val2pos(value);
-				arc_dsc.color = lv_color_hex(ui_plot_channel_color[info->chanel]);
-				lv_canvas_draw_arc(ui_plot_obj.canvas, pos.x, pos.y, 2, 0, 360, &arc_dsc);
-			}
+//			if (ui_plot_info.channel_visible[info->chanel])
+//			{
+//				pos = ui_plot_val2pos(value);
+//				arc_dsc.color = lv_color_hex(ui_plot_channel_color[info->chanel]);
+//				lv_canvas_draw_arc(ui_plot_obj.canvas, pos.x, pos.y, 2, 0, 360, &arc_dsc);
+//			}
 			//ui_textarea_set_nmuber(ui_plot_obj.txt_ch[info->chanel], value.y);	
 		}
 		
 		cmd_report_tail++;
 		cmd_report_tail &= 0xf;	
 	}
+	ui_plot_refresh_by_buffer();
 }
 
 void ui_plot_axis(lv_obj_t* parent, bool is_label)
@@ -425,7 +429,7 @@ void ui_plot_screen_init(void)
 	//ui_plot_scan_points = (uint16_t*)malloc(UI_PLOT_MAX_POINTS * UI_PLOT_CHANNEL_NUM * sizeof(uint16_t));
 	memset(ui_plot_scan_points, 0, sizeof(uint16_t)*UI_PLOT_CHANNEL_NUM * UI_PLOT_MAX_POINTS);
 	ui_plot_axis(plot_panel, true);
-	lv_timer_create(ui_plot_update_timer, 200, NULL);
+	lv_timer_create(ui_plot_update_timer, 1000, NULL);
 	
 	// ui_plot_button_status(false);
 	// lv_timer_create(ui_plot_update_timer, 200, NULL);
@@ -501,7 +505,7 @@ void ui_plot_peaks()
 	lv_draw_arc_dsc_t arc_dsc;
 	lv_draw_line_dsc_init(&line_dsc);
 	lv_draw_arc_dsc_init(&arc_dsc);
-	arc_dsc.width = 3; // Set the width of the arc line
+	arc_dsc.width = 2; // Set the width of the arc line
 	line_dsc.width = 1; // Set line width
 	line_dsc.opa = LV_OPA_60; // Set line opacity (fully opaque)
 	for (int i = 0; i < UI_PLOT_CHANNEL_NUM; i++)
@@ -541,7 +545,7 @@ void ui_plot_refresh_by_buffer()
 	lv_draw_arc_dsc_t arc_dsc;
 	lv_draw_arc_dsc_init(&arc_dsc);
 	
-	arc_dsc.width = 3; // Set the width of the arc line
+	arc_dsc.width = 1; // Set the width of the arc line
 	for (int i = 0; i < UI_PLOT_MAX_POINTS; i++)
 	{
 		for(int j = 0; j < UI_PLOT_CHANNEL_NUM; j ++)

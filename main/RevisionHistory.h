@@ -2,10 +2,10 @@
 
 #define SYSTEMINFO "SC01_Control"
 #define RevisionHeader ">Hy:L_Core:"
-#define MajorStep      "1.27"
-#define RevisionDate   "1/6/2026"
+#define MajorStep      "1.28"
+#define RevisionDate   "1/8/2026"
 #define SYSTEMVERSION  MajorStep " " RevisionDate
-#define CONTROLLABEL   "HYREL "MajorStep
+#define CONTROLLABEL   "HYREL " MajorStep
 #define CONNECTIONSTRING ">Hy:L_Core Rev " MajorStep ":" RevisionDate ":SC01_Control:---:\n"   //"1.000:0:0:0:USB"
 
 /* 
