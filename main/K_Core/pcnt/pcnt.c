@@ -159,39 +159,6 @@ void Calculate_Heater_DutyCycle() {
 					if(Kfactor<1)Kfactor += 0.002f;
 				}
 			}
-//			ui_plot_scan_points[0][xoffset] = (uint16_t) TargetTemperature;
-//			ui_plot_scan_points[1][xoffset] = (uint16_t) pcnt_info.temperature;
-//			ui_plot_scan_points[2][xoffset] = (uint16_t) pcnt_info.duty;
-//			ui_plot_scan_points[3][xoffset] = (uint16_t) Kfactor * 100;
-
-//			value.x = xoffset;
-//			value.y = (uint16_t) TargetTemperature;
-//			if (value.x >= ui_plot_info.min_x && value.x < ui_plot_info.min_x + UI_PLOT_MAX_POINTS)
-//			{
-//				ui_plot_scan_points[0][value.x - ui_plot_info.min_x] =  value.y;	
-//			}
-//			value.y = (uint16_t) TargetTemperature;
-//			pos = ui_plot_val2pos(value);
-//			arc_dsc.color = lv_color_hex(UI_PLOT_COLOR_CH0);
-//			lv_canvas_draw_arc(ui_plot_obj.canvas, pos.x, pos.y, 2, 0, 360, &arc_dsc);
-//			
-//			value.y = (uint16_t) pcnt_info.temperature;
-//			pos = ui_plot_val2pos(value);
-//			arc_dsc.color = lv_color_hex(UI_PLOT_COLOR_CH1);
-//			lv_canvas_draw_arc(ui_plot_obj.canvas, pos.x, pos.y, 2, 0, 360, &arc_dsc);
-//			
-//			value.y = (uint16_t) pcnt_info.duty;
-//			pos = ui_plot_val2pos(value);
-//			arc_dsc.color = lv_color_hex(UI_PLOT_COLOR_CH2);
-//			lv_canvas_draw_arc(ui_plot_obj.canvas, pos.x, pos.y, 2, 0, 360, &arc_dsc);
-//			
-//			value.y = (uint16_t) Kfactor * 100;
-//			pos = ui_plot_val2pos(value);
-//			arc_dsc.color = lv_color_hex(UI_PLOT_COLOR_CH3);
-//			lv_canvas_draw_arc(ui_plot_obj.canvas, pos.x, pos.y, 2, 0, 360, &arc_dsc);
-//			
-
-			//return;
 		}
 		if (mode == 2)
 		{
@@ -209,6 +176,7 @@ void Calculate_Heater_DutyCycle() {
 		ui_plot_scan_points[1][xoffset] = (uint16_t) pcnt_info.temperature;
 		ui_plot_scan_points[2][xoffset] = (uint16_t) pcnt_info.duty;
 		ui_plot_scan_points[3][xoffset] = (uint16_t) Kfactor * 100;
+		ui_plot_scan_points[4][xoffset] = (uint16_t) pcnt_info.bat_volt * 10;
 		return;//only plot is enabled
 	}
 

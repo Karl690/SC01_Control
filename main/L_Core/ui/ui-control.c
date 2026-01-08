@@ -34,9 +34,11 @@ void ui_control_button_handler(lv_event_t * e) {
 		systemconfig.pcnt.enabled = systemconfig.pcnt.enabled == 1 ? 0 : 1;
 		if (systemconfig.pcnt.enabled)
 		{
-			HeartBeat = 0; //rest temp plot to zero time
+			ui_plot_clear(); //rest temp plot to zero time
+			HeartBeat = 0;
 			ui_plot_info.max_y = 300;
 			ui_plot_info.step_yn = ((ui_plot_info.max_y - ui_plot_info.min_y) / 50) * 10;
+			
 		}
 		//ui_control_send_ble_command(BTN_TEMP_ONOFF);
 		break;
