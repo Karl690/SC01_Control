@@ -175,7 +175,7 @@ void Calculate_Heater_DutyCycle() {
 		ui_plot_scan_points[0][xoffset] = (uint16_t) TargetTemperature;
 		ui_plot_scan_points[1][xoffset] = (uint16_t) pcnt_info.temperature;
 		ui_plot_scan_points[2][xoffset] = (uint16_t) pcnt_info.duty;
-		ui_plot_scan_points[3][xoffset] = (uint16_t) Kfactor * 100;
+		ui_plot_scan_points[3][xoffset] = (uint16_t) (Kfactor * 100);
 		ui_plot_scan_points[4][xoffset] = (uint16_t) pcnt_info.bat_volt * 10;
 		return;//only plot is enabled
 	}

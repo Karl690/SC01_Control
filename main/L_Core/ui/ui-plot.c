@@ -319,7 +319,7 @@ void ui_plot_screen_init(void)
 	lv_obj_set_pos(obj, x, y);
 	lv_textarea_set_align(obj, LV_TEXT_ALIGN_CENTER);
 	ui_textarea_set_readonly(obj, true);
-	lv_textarea_set_text(obj, "0");
+	lv_textarea_set_text(obj, "P_TMP");
 	ui_plot_obj.txt_ch[0] = obj;
 	
 	obj = ui_create_button(ui_plot_screen, "", 30, 26, 2, font, ui_plot_event_button_cb, (void*)UI_PLOT_BTN_CHANNLE_00);
@@ -334,7 +334,7 @@ void ui_plot_screen_init(void)
 	lv_obj_set_pos(obj, x, y);
 	lv_textarea_set_align(obj, LV_TEXT_ALIGN_CENTER);
 	ui_textarea_set_readonly(obj, true);
-	lv_textarea_set_text(obj, "0");
+	lv_textarea_set_text(obj, "A_TMP");
 	ui_plot_obj.txt_ch[1] = obj;
 	
 	obj = ui_create_button(ui_plot_screen, "", 30, 26, 2, font, ui_plot_event_button_cb, (void*)UI_PLOT_BTN_CHANNLE_01);
@@ -349,7 +349,7 @@ void ui_plot_screen_init(void)
 	lv_obj_set_pos(obj, x, y);
 	lv_textarea_set_align(obj, LV_TEXT_ALIGN_CENTER);
 	ui_textarea_set_readonly(obj, true);
-	lv_textarea_set_text(obj, "0");
+	lv_textarea_set_text(obj, "DUTY");
 	ui_plot_obj.txt_ch[2] = obj;
 	
 	obj = ui_create_button(ui_plot_screen, "", 30, 26, 2, font, ui_plot_event_button_cb, (void*)UI_PLOT_BTN_CHANNLE_02);
@@ -364,7 +364,7 @@ void ui_plot_screen_init(void)
 	lv_obj_set_pos(obj, x, y);
 	lv_textarea_set_align(obj, LV_TEXT_ALIGN_CENTER);
 	ui_textarea_set_readonly(obj, true);
-	lv_textarea_set_text(obj, "0");
+	lv_textarea_set_text(obj, "Kfctr");
 	ui_plot_obj.txt_ch[3] = obj;
 	
 	obj = ui_create_button(ui_plot_screen, "", 30, 26, 2, font, ui_plot_event_button_cb, (void*)UI_PLOT_BTN_CHANNLE_03);
@@ -379,7 +379,7 @@ void ui_plot_screen_init(void)
 	lv_obj_set_pos(obj, x, y);
 	lv_textarea_set_align(obj, LV_TEXT_ALIGN_CENTER);
 	ui_textarea_set_readonly(obj, true);
-	lv_textarea_set_text(obj, "0");
+	lv_textarea_set_text(obj, "Bat_V");
 	ui_plot_obj.txt_ch[4] = obj;
 	
 	obj = ui_create_button(ui_plot_screen, "", 30, 26, 2, font, ui_plot_event_button_cb, (void*)UI_PLOT_BTN_CHANNLE_04);
