@@ -36,7 +36,11 @@ void ui_control_button_handler(lv_event_t * e) {
 		{
 			ui_plot_clear(); //rest temp plot to zero time
 			HeartBeat = 0;
-			ui_plot_info.max_y = 300;
+			ui_plot_info.max_y = 150;
+			if (systemconfig.pcnt.programmed_temperature > ui_plot_info.max_y)
+			{
+				ui_plot_info.max_y = systemconfig.pcnt.programmed_temperature + 50;
+			}
 			ui_plot_info.step_yn = ((ui_plot_info.max_y - ui_plot_info.min_y) / 50) * 10;
 			
 		}

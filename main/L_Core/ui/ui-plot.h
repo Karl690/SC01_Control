@@ -1,6 +1,6 @@
 #include "lvgl.h"
 #define UI_PLOT_CHANNEL_NUM 6
-#define UI_PLOT_MAX_POINTS	1024
+#define UI_PLOT_MAX_POINTS	256
 enum  
 {
 	UI_PLOT_BTN_SCAN,  

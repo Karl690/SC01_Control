@@ -28,10 +28,10 @@ uint32_t ui_plot_channel_color[UI_PLOT_CHANNEL_NUM] = {
 
 UI_PLOT_INFO ui_plot_info = {
 	.min_x = 0,
-	.max_x = 1000,
+	.max_x = 260,
 	.min_y = 0,
 	.max_y = 1000,
-	.step_xn = 200,
+	.step_xn = 60,
 	.step_yn = 200,
 	.channel_visible = {1, 1, 1,1,1,1}
 };
@@ -49,13 +49,13 @@ void ui_plot_zoom(bool inout)
 {
 	if (inout) // zoom in
 	{
-		ui_plot_info.max_y += 100;
+		ui_plot_info.max_y += 50;
 		ui_plot_info.step_yn = ((ui_plot_info.max_y - ui_plot_info.min_y) / 50) * 10;
 		
 	}
 	else // zoom out
 	{
-		if (ui_plot_info.max_y - 100 > 50)
+		if (ui_plot_info.max_y - 50 > 50)
 		{
 			ui_plot_info.max_y -= 50;
 			ui_plot_info.step_yn = ((ui_plot_info.max_y - ui_plot_info.min_y) / 50) * 10;

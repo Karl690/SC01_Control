@@ -135,7 +135,7 @@ void Calculate_Heater_DutyCycle() {
 	
 	arc_dsc.width = 1; // Set the width of the arc line
 	
-	int xoffset = (HeartBeat & 0x03ff);//
+	int xoffset = (HeartBeat & 0x000000ff);//
 	//xoffset += ui_plot_info.min_x;
 	
 	int mode = systemconfig.mode.option;//heat or chill mode
