@@ -21,20 +21,21 @@ SYSTEMCONFIG systemconfig;
 RUN_MODE run_mode = RUN_NORMAL;
 bool dump_display_sending = false;
 uint32_t dump_display_waiting = 10;
-uint32_t waitforFlash = 10000000; //reboot semephore = 0;
+//uint32_t waitforFlash = 40000000; //reboot semephore = 0;
 char temp_string[256];
 extern "C" void app_main(void)
 {//we have this token to freeze the boot sequence before all the processes get started
 	//because they were infering with the flash over usb
-	while (waitforFlash)
-	{
-		//wait for flash or hardreset
-		waitforFlash--;
-	}
+//	while (waitforFlash)
+//	{
+//		//wait for flash or hardreset
+//		waitforFlash--;
+//	}
 	//esp_log_level_set(TAG, ESP_LOG_DEBUG); // enable DEBUG logs for this App
     //Initialize NVS
 	esp_err_t ret = nvs_flash_init();
-	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+	{
 		ESP_ERROR_CHECK(nvs_flash_erase());
 		ret = nvs_flash_init();
 	}
