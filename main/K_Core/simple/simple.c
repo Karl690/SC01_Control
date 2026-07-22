@@ -6,6 +6,8 @@
 #include "L_Core/ui/ui-simple.h"
 #include "K_Core/amplifier/amplifier.h"
 #include "K_Core/execution/cmdprocessor.h"
+#include "L_Core/bluetooth/ble.h"
+
 SIMPLE_OBJ simple_obj;
 GENERATOR_STATUS simple_generator_status[SIMPLE_GENERATOR_NUM];
 uint16_t simple_buffer_pos = 0;
@@ -14,6 +16,12 @@ uint8_t ui_simple_cmd[10];
 uint32_t simple_dump_display_address = 0;
 bool simple_dump_captured = false;
 
+//screen dump commands 
+uint8_t ScreenDumpStartMsg[3]	= { 'D', 'S', CMD_END_CHAR };
+uint8_t ScreenDumpSizeMsg[3]	= { 'D', 'N', CMD_END_CHAR };
+uint8_t ScreenDumpEndMsg[3]		= { 'D', 'U', CMD_END_CHAR };
+uint8_t ScreenDumpCompleteMsg[3] = { 'D', 'C', CMD_END_CHAR };
+uint8_t ScreenDumpErrorMsg[3]	= { 'D', 'E', CMD_END_CHAR };
 
 uint8_t simple_command_start_logging[3] = { 'L', '0', CMD_END_CHAR  };
 uint8_t simple_command_stop_logging[3] = { 'l', '0', CMD_END_CHAR };
@@ -234,7 +242,8 @@ void simple_send_dump_screen()
 		if (dump_display_waiting > 1) dump_display_waiting--;
 		else if(dump_display_waiting == 1)
 		{
-			uart_write_bytes((uart_port_t)ComUart2.uart_id, "DC\n", 3); //Complete = C
+			ble_server_send_data(ScreenDumpCompleteMsg, 3); // Start
+			//uart_write_bytes((uart_port_t)ComUart2.uart_id, "DC\n", 3); //Complete = C
 			dump_display_waiting--;
 		}
 		return;
@@ -257,8 +266,9 @@ void simple_send_dump_screen()
 	{
 		bytes = display_compress_buffer_size - simple_dump_display_address;
 	}
-	uart_write_bytes((uart_port_t)ComUart2.uart_id, display_snapshot_compress_buffer + address, bytes);
-	simple_dump_display_address += bytes;
+	ble_server_send_data(display_snapshot_compress_buffer + address, bytes); // Start
+	//uart_write_bytes((uart_port_t)ComUart2.uart_id, display_snapshot_compress_buffer + address, bytes);
+	//simple_dump_display_address += bytes;
 	sprintf(temp_string, "%d/%d bytes sent", (int)simple_dump_display_address, display_compress_buffer_size);
 	ui_simple_add_log(temp_string, UI_SEND_COLOR);
 }
@@ -341,6 +351,33 @@ void simple_download_responsive(char* command)
 {
 	SendStringToMeg407("M809 D1\n");
 }
+void StartScreenDump()
+{//starts screen dump
+	ble_server_send_data(ScreenDumpStartMsg, 3); // Start
+//uart_write_bytes((uart_port_t)ComUart2.uart_id, "DS\n", 3); // Start
+	dump_display_waiting = WAITING_VALUE;
+	simple_dump_display_address = 0;
+	dump_display_sending = true;	
+	if (display_dump_buffer())
+	{
+		//if you get here, the current display buffer has been successfully compressed 
+		simple_dump_captured = true;
+		sprintf(temp_string, "DN %5d\n", display_compress_buffer_size); //Display Number = DN
+		ble_server_send_data((uint8_t*)temp_string, strlen(temp_string));
+	}
+	else
+	{
+		ble_server_send_data(ScreenDumpErrorMsg, 3); // Error
+		//uart_write_bytes((uart_port_t)ComUart2.uart_id, "DE\n", 3); // ERROR
+	}
+}
+void StopScreenDump()
+{
+	dump_display_waiting = 0;
+	dump_display_sending = false;
+	ble_server_send_data(ScreenDumpEndMsg, 3); // Error
+}
+
 void simple_parse_command()
 {
 	if (simple_obj.head == simple_obj.tail) return;//check to see if a character is waiting
@@ -359,25 +396,10 @@ void simple_parse_command()
 	{
 		//screen dumping commands, not part of normal simple serial operation, use with caution
 	case 'R':
-		uart_write_bytes((uart_port_t)ComUart2.uart_id, "DS\n", 3); // Start
-		dump_display_waiting = WAITING_VALUE;
-		simple_dump_display_address = 0;
-		dump_display_sending = true;	
-		if (display_dump_buffer())
-		{
-			simple_dump_captured = true;
-			sprintf(temp_string, "DN %d\n", display_compress_buffer_size); //Display Number = DN
-			uart_write_bytes((uart_port_t)ComUart2.uart_id, temp_string, strlen(temp_string));
-		}
-		else
-		{
-			uart_write_bytes((uart_port_t)ComUart2.uart_id, "DE\n", 3); // ERROR
-		}
+		StartScreenDump();//send a copy of the current screen to ble client
 		break;
 	case 'r':
-		dump_display_waiting = 0;
-		dump_display_sending = false;
-		uart_write_bytes((uart_port_t)ComUart2.uart_id, "DU\n", 3); // Display stop by user
+		StopScreenDump();
 		break;
 		//end of section for screen dump 		
 	case 'L': // Start sending Q string, start automatic logging

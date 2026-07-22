@@ -2,6 +2,8 @@
 #include "sequencer.h"
 #include "L_Core/ui/ui-simple.h"
 #include "K_Core/taskmanager.h"
+#include "L_Core/bluetooth/ble.h"
+#include "K_Core/simple/simple.h"
 
 
 void M_Code_M104(void) 
@@ -54,4 +56,14 @@ void M_Code_M104(void)
 	systemconfig.pcnt.enabled = false;
 	refreshRequest = true;
 
+}
+
+void M_Code_M800(void) 
+{//M800 ScreenDump
+	if (ARG_S == 1)
+	{
+		StartScreenDump();
+		return;	
+	}
+	StopScreenDump();
 }

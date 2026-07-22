@@ -47,6 +47,8 @@ typedef struct
 }GENERATOR_STATUS;
 
 extern SIMPLE_OBJ simple_obj;
+void StartScreenDump();
+void StopScreenDump();
 void simple_init();
 void simple_send_command(uint8_t code);
 void simple_send_ping();

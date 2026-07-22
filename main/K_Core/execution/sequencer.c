@@ -198,7 +198,7 @@ void Sequencer()
 //	      case 799 : M_Code_M799(); return; // get PLL and Clock status for 407
 	    //   case 799 : M_Code_M799(); return; // this is a test for fault .
 		    
-	    // case 800:	M_Code_M800(); return;
+	     case 800:	M_Code_M800(); 	    return;
 	    // case 801:	M_Code_M801(); return;
 	    // case 802:	M_Code_M802(); return;
 	    // case 803:	M_Code_M803(); return;
